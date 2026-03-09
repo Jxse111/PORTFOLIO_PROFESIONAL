@@ -118,6 +118,18 @@ const about: About = {
     title: "Experiencia laboral",
     experiences: [
       {
+        company: "Berdea SAT",
+        timeframe: "currently working",
+        role: "Full-stack Developer",
+        achievements: [
+          <>
+            Actualmente trabajo como desarrollador full-stack en Berdea SAT,
+            donde colaboro en el desarrollo de aplicaciones web y la gestión de
+            proyectos.
+          </>,
+        ],
+      },
+      {
         company: "TECH LINKU GROUP SL",
         timeframe: "03/2025 - 06/2025",
         role: "Técnico en prácticas",
