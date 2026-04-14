@@ -5,6 +5,7 @@ import "@/resources/custom.css";
 
 import classNames from "classnames";
 import Script from 'next/script';
+import { Analytics } from "@vercel/analytics/next";
 
 import {
   Background,
@@ -199,6 +200,7 @@ export default async function RootLayout({
               </Script>
             </>
           )}
+          <Analytics />
         </Column>
       </Providers>
     </Flex>
