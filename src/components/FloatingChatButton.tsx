@@ -1,30 +1,41 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Button } from '@once-ui-system/core';
 import ChatModal from './ChatModal';
 
 export default function FloatingChatButton() {
   const [isOpen, setIsOpen] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const updateViewport = () => setIsMobile(window.innerWidth <= 768);
+    updateViewport();
+    window.addEventListener('resize', updateViewport);
+
+    return () => window.removeEventListener('resize', updateViewport);
+  }, []);
 
   return (
     <>
       <Button
         id="floating-chat-button"
         data-border="rounded"
-        variant="primary"
+        variant="secondary"
         size="m"
         style={{
           position: 'fixed',
-          bottom: '20px',
-          right: '20px',
+          bottom: isMobile ? '30px' : '20px',
+          right: isMobile ? '12px' : '20px',
           zIndex: 1000,
-          width: '64px',
-          height: '64px',
+          width: isMobile ? '36px' : '64px',
+          height: isMobile ? '36px' : '64px',
           borderRadius: '50%',
-          boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
+          boxShadow: isMobile ? '0 2px 8px rgba(0, 0, 0, 0.18)' : '0 4px 12px rgba(0, 0, 0, 0.15)',
           transition: 'all 0.3s ease',
-          border: 'none',
+          background: 'var(--page-background)',
+          color: 'var(--neutral-on-background-strong)',
+          border: '1px solid var(--neutral-alpha-medium)',
           cursor: 'pointer',
         }}
         onMouseEnter={(e: React.MouseEvent<HTMLButtonElement>) => {
@@ -40,8 +51,8 @@ export default function FloatingChatButton() {
       >
         <svg
           xmlns="http://www.w3.org/2000/svg"
-          width="24"
-          height="24"
+          width={isMobile ? 14 : 24}
+          height={isMobile ? 14 : 24}
           viewBox="0 0 24 24"
           fill="none"
           stroke="currentColor"

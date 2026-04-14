@@ -44,6 +44,7 @@ export default TimeDisplay;
 
 export const Header = () => {
   const pathname = usePathname() ?? "";
+  const whatsappUrl = "https://wa.me/34644497129";
 
   return (
     <>
@@ -166,6 +167,23 @@ export const Header = () => {
                   </Row>
                 </>
               )}
+              <>
+                <Row s={{ hide: true }}>
+                  <ToggleButton
+                    prefixIcon="whatsapp"
+                    href={whatsappUrl}
+                    label="WhatsApp"
+                    selected={false}
+                  />
+                </Row>
+                <Row hide s={{ hide: false }}>
+                  <ToggleButton
+                    prefixIcon="whatsapp"
+                    href={whatsappUrl}
+                    selected={false}
+                  />
+                </Row>
+              </>
               {display.themeSwitcher && (
                 <>
                   <Line background="neutral-alpha-medium" vert maxHeight="24" />
