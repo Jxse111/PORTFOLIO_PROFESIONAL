@@ -46,6 +46,20 @@ export const Header = () => {
   const pathname = usePathname() ?? "";
   const whatsappUrl = "https://wa.me/34644497129";
 
+  useEffect(() => {
+    const viewportWidth = window.innerWidth;
+    const mobileNavItems = document.querySelectorAll('header a').length;
+    const hasWhatsappItem = Boolean(document.getElementById("mobile-whatsapp-link"));
+
+    // #region agent log
+    fetch('http://127.0.0.1:7354/ingest/5d1a73b8-d670-4460-b29f-7d6b34763738',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'d72cd3'},body:JSON.stringify({sessionId:'d72cd3',runId:'pre-fix',hypothesisId:'H3',location:'Header.tsx:52',message:'Header nav runtime state',data:{pathname,viewportWidth,mobileNavItems},timestamp:Date.now()})}).catch(()=>{});
+    // #endregion
+
+    // #region agent log
+    fetch('http://127.0.0.1:7354/ingest/5d1a73b8-d670-4460-b29f-7d6b34763738',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'d72cd3'},body:JSON.stringify({sessionId:'d72cd3',runId:'pre-fix',hypothesisId:'H4',location:'Header.tsx:56',message:'WhatsApp nav item presence',data:{hasWhatsappItem},timestamp:Date.now()})}).catch(()=>{});
+    // #endregion
+  }, [pathname]);
+
   return (
     <>
       <Fade s={{ hide: true }} fillWidth position="fixed" height="80" zIndex={9} />
