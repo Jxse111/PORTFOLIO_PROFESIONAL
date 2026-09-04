@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { isValidEmail, normalizeEmail } from "@/lib/validation";
-import mailchimp from "@mailchimp/mailchimp_marketing";
+
+const mailchimp = require("@mailchimp/mailchimp_marketing");
 
 mailchimp.setConfig({
   apiKey: process.env.MAILCHIMP_API_KEY,
