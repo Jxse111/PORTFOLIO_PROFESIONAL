@@ -5,7 +5,6 @@ import "@/resources/custom.css";
 
 import classNames from "classnames";
 import Script from 'next/script';
-
 import {
   Background,
   Column,
@@ -18,6 +17,7 @@ import {
 import { Footer, Header, RouteGuard, Providers } from "@/components";
 import FloatingChatButton from "@/components/FloatingChatButton";
 import DebugBeacon from "@/components/DebugBeacon";
+import { SpeedInsights } from "@vercel/speed-insights/next";
 import { baseURL, effects, fonts, style, dataStyle, home } from "@/resources";
 
 export async function generateMetadata() {
@@ -71,7 +71,7 @@ export default async function RootLayout({
                 try {
                   const root = document.documentElement;
                   const defaultTheme = 'system';
-                  
+
                   // Set defaults from config
                   const config = ${JSON.stringify({
                     brand: style.brand,
@@ -85,12 +85,12 @@ export default async function RootLayout({
                     scaling: style.scaling,
                     "viz-style": dataStyle.variant,
                   })};
-                  
+
                   // Apply default values
                   Object.entries(config).forEach(([key, value]) => {
                     root.setAttribute('data-' + key, value);
                   });
-                  
+
                   // Resolve theme
                   const resolveTheme = (themeValue) => {
                     if (!themeValue || themeValue === 'system') {
@@ -98,12 +98,12 @@ export default async function RootLayout({
                     }
                     return themeValue;
                   };
-                  
+
                   // Apply saved theme
                   const savedTheme = localStorage.getItem('data-theme');
                   const resolvedTheme = resolveTheme(savedTheme);
                   root.setAttribute('data-theme', resolvedTheme);
-                  
+
                   // Apply any saved style overrides
                   const styleKeys = Object.keys(config);
                   styleKeys.forEach(key => {
@@ -183,6 +183,7 @@ export default async function RootLayout({
           </Flex>
           <Footer />
           <FloatingChatButton />
+          <SpeedInsights />
 
           {/* Google Analytics - Solo se carga en producción y si existe el ID */}
           {isProduction && gaId && (
