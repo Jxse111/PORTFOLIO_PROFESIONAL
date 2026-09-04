@@ -16,8 +16,14 @@ type NewsletterData = {
 function ensureStore() {
   if (!fs.existsSync(DATA_DIR)) fs.mkdirSync(DATA_DIR, { recursive: true });
   if (!fs.existsSync(FILE_PATH)) {
-    fs.writeFileSync(FILE_PATH, JSON.stringify({ subscribers: [] } satisfies NewsletterData, null, 2));
+    atomicWrite({ subscribers: [] });
   }
+}
+
+function atomicWrite(data: NewsletterData) {
+  const tmp = `${FILE_PATH}.tmp`;
+  fs.writeFileSync(tmp, JSON.stringify(data, null, 2));
+  fs.renameSync(tmp, FILE_PATH);
 }
 
 export function readSubscribers(): Subscriber[] {
@@ -37,6 +43,6 @@ export function addSubscriber(email: string): { added: boolean } {
   const exists = subs.some((s) => s.email === email);
   if (exists) return { added: false };
   subs.push({ email, subscribedAt: new Date().toISOString() });
-  fs.writeFileSync(FILE_PATH, JSON.stringify({ subscribers: subs } satisfies NewsletterData, null, 2));
+  atomicWrite({ subscribers: subs });
   return { added: true };
 }

@@ -9,8 +9,14 @@ type NotifiedData = { slugs: string[] };
 function ensureStore() {
   if (!fs.existsSync(DATA_DIR)) fs.mkdirSync(DATA_DIR, { recursive: true });
   if (!fs.existsSync(FILE_PATH)) {
-    fs.writeFileSync(FILE_PATH, JSON.stringify({ slugs: [] } satisfies NotifiedData, null, 2));
+    atomicWrite({ slugs: [] });
   }
+}
+
+function atomicWrite(data: NotifiedData) {
+  const tmp = `${FILE_PATH}.tmp`;
+  fs.writeFileSync(tmp, JSON.stringify(data, null, 2));
+  fs.renameSync(tmp, FILE_PATH);
 }
 
 export function readNotifiedSlugs(): string[] {
@@ -29,5 +35,5 @@ export function addNotifiedSlug(slug: string) {
   const slugs = readNotifiedSlugs();
   if (slugs.includes(slug)) return;
   slugs.push(slug);
-  fs.writeFileSync(FILE_PATH, JSON.stringify({ slugs }, null, 2));
+  atomicWrite({ slugs });
 }
