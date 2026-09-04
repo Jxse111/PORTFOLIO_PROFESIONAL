@@ -1,4 +1,5 @@
 import type { NextRequest } from 'next/server';
+import { isValidEmail } from "@/lib/validation";
 
 interface CommentData {
   name: string;
@@ -8,7 +9,28 @@ interface CommentData {
   postSlug: string;
 }
 
+const MAX_NAME_LENGTH = 100;
+const MAX_COMMENT_LENGTH = 2000;
+
+// Simple in-memory rate limiter (use Redis/Upstash in production)
+const attempts = new Map<string, number[]>();
+function isRateLimited(ip: string, limit = 5, windowMs = 15 * 60 * 1000): boolean {
+  const now = Date.now();
+  const timestamps = attempts.get(ip) || [];
+  const recent = timestamps.filter((t) => now - t < windowMs);
+  if (recent.length >= limit) return true;
+  recent.push(now);
+  attempts.set(ip, recent);
+  return false;
+}
+
 export async function POST(request: NextRequest) {
+  const ip = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || "unknown";
+
+  if (isRateLimited(ip)) {
+    return Response.json({ error: 'Demasiadas solicitudes' }, { status: 429 });
+  }
+
   try {
     const body: CommentData = await request.json();
     const { name, email, comment, postTitle, postSlug } = body;
@@ -21,16 +43,22 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Validar email
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email)) {
+    // Validar email usando la utilidad compartida
+    if (!isValidEmail(email)) {
       return Response.json(
         { error: 'Email inválido' },
         { status: 400 }
       );
     }
 
-    // Validar longitud del comentario
+    // Validar longitudes
+    if (name.length > MAX_NAME_LENGTH) {
+      return Response.json(
+        { error: 'El nombre es demasiado largo' },
+        { status: 400 }
+      );
+    }
+
     if (comment.trim().length < 10) {
       return Response.json(
         { error: 'El comentario debe tener al menos 10 caracteres' },
@@ -38,38 +66,15 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Aquí puedes agregar la lógica para:
-    // 1. Guardar el comentario en una base de datos
-    // 2. Enviar un email usando un servicio como Nodemailer
-    // 3. O cualquier otra lógica que necesites
+    if (comment.length > MAX_COMMENT_LENGTH) {
+      return Response.json(
+        { error: 'El comentario es demasiado largo' },
+        { status: 400 }
+      );
+    }
 
-    // Por ahora, solo vamos a simular el envío exitoso
-    console.log('Nuevo comentario recibido:', {
-      name,
-      email,
-      comment,
-      postTitle,
-      postSlug,
-      timestamp: new Date().toISOString()
-    });
-
-    // Simular envío de email (reemplaza esto con tu lógica real)
-    const emailContent = `
-Nuevo comentario en: ${postTitle}
-
-De: ${name} (${email})
-Post: ${postTitle}
-URL del post: /blog/${postSlug}
-
-Comentario:
-${comment}
-
----
-Este comentario fue enviado desde tu portfolio profesional.
-    `.trim();
-
-    // Aquí iría la lógica real para enviar el email
-    // Por ejemplo, usando Nodemailer, SendGrid, etc.
+    // TODO: implementar almacenamiento real (base de datos) y/o envío de email.
+    // No se registra PII en consola para evitar fugas de datos.
 
     return Response.json({
       success: true,

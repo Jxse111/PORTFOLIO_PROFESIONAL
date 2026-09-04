@@ -65,12 +65,33 @@ async function extractMetadata(html: string) {
   };
 }
 
+function isValidTargetUrl(url: string): boolean {
+  try {
+    const u = new URL(url);
+    if (u.protocol !== 'https:') return false;
+    const hostname = u.hostname.toLowerCase();
+    if (hostname === 'localhost') return false;
+    if (/^127\./.test(hostname)) return false;
+    if (/^10\./.test(hostname)) return false;
+    if (/^192\.168\./.test(hostname)) return false;
+    if (/^169\.254\./.test(hostname)) return false;
+    if (/^172\.(1[6-9]|2[0-9]|3[01])\./.test(hostname)) return false;
+    return true;
+  } catch {
+    return false;
+  }
+}
+
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
   const url = searchParams.get('url');
 
   if (!url) {
     return NextResponse.json({ error: 'URL is required' }, { status: 400 });
+  }
+
+  if (!isValidTargetUrl(url)) {
+    return NextResponse.json({ error: 'Invalid or forbidden URL' }, { status: 400 });
   }
 
   try {
