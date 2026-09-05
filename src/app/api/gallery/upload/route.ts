@@ -1,7 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 import { put } from "@vercel/blob";
 import { SESSION_COOKIE, verifySessionToken } from "@/lib/gallery/auth";
-import { BLOB_PREFIX, INDEX_PATH, readUploadedImages, type UploadedImage } from "@/lib/gallery/images";
+import {
+  BLOB_PREFIX,
+  INDEX_PATH,
+  blobConfigured,
+  readUploadedImages,
+  type UploadedImage,
+} from "@/lib/gallery/images";
 
 export const runtime = "nodejs";
 
@@ -24,9 +30,12 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ message: "No autorizado" }, { status: 401 });
   }
 
-  if (!process.env.BLOB_READ_WRITE_TOKEN) {
-    console.error("BLOB_READ_WRITE_TOKEN no está configurada");
-    return NextResponse.json({ message: "Almacenamiento no configurado" }, { status: 500 });
+  if (!blobConfigured()) {
+    console.error("No hay ningún Blob store conectado al proyecto");
+    return NextResponse.json(
+      { message: "Almacenamiento no configurado: conecta un Blob store al proyecto" },
+      { status: 500 },
+    );
   }
 
   let form: FormData;

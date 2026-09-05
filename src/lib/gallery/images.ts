@@ -21,8 +21,12 @@ export interface UploadedImage {
   uploadedAt: string;
 }
 
-function blobConfigured(): boolean {
-  return Boolean(process.env.BLOB_READ_WRITE_TOKEN);
+/**
+ * Vercel conecta los stores por OIDC (BLOB_STORE_ID) desde 2025 y solo añade
+ * BLOB_READ_WRITE_TOKEN en algunos casos, así que vale cualquiera de los dos.
+ */
+export function blobConfigured(): boolean {
+  return Boolean(process.env.BLOB_READ_WRITE_TOKEN || process.env.BLOB_STORE_ID);
 }
 
 /**
