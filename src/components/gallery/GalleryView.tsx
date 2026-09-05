@@ -2,9 +2,13 @@
 
 import { Media, MasonryGrid } from "@once-ui-system/core";
 import { useEffect, useState } from "react";
-import { gallery } from "@/resources";
+import type { GalleryImage } from "@/lib/gallery/images";
 
-export default function GalleryView() {
+interface GalleryViewProps {
+  images: GalleryImage[];
+}
+
+export default function GalleryView({ images }: GalleryViewProps) {
   const [isMobile, setIsMobile] = useState(false);
 
   useEffect(() => {
@@ -17,12 +21,12 @@ export default function GalleryView() {
 
   return (
     <MasonryGrid columns={2} s={{ columns: 1 }}>
-      {gallery.images.map((image, index) => (
+      {images.map((image, index) => (
         <Media
           enlarge
           priority={index < 10}
           sizes="(max-width: 768px) 100vw, 50vw"
-          key={index}
+          key={image.src}
           radius="m"
           aspectRatio={
             isMobile ? "4 / 3" : image.orientation === "horizontal" ? "16 / 9" : "3 / 4"

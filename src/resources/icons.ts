@@ -19,6 +19,7 @@ import {
   HiChevronRight,
   HiOutlineMagnifyingGlass,
   HiOutlineFire,
+  HiPlus,
 } from "react-icons/hi2";
 
 import {
@@ -80,6 +81,7 @@ export const iconLibrary: Record<string, IconType> = {
   search: HiOutlineMagnifyingGlass,
   fire: HiOutlineFire,
   apple: FaApple,
+  plus: HiPlus,
 };
 
 export type IconLibrary = typeof iconLibrary;
