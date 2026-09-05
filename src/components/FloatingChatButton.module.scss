@@ -1,0 +1,67 @@
+@use "./breakpoints.scss" as *;
+
+.button {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 56px;
+  height: 56px;
+  color: var(--neutral-on-background-strong);
+  background: var(--page-background);
+  border: 1px solid var(--neutral-alpha-medium);
+  border-radius: var(--radius-full);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.16);
+  cursor: pointer;
+  transition:
+    transform 200ms cubic-bezier(0.16, 1, 0.3, 1),
+    box-shadow 200ms ease,
+    opacity 160ms ease;
+
+  svg {
+    width: 24px;
+    height: 24px;
+  }
+
+  &:hover {
+    transform: scale(1.08);
+    box-shadow: 0 6px 22px rgba(0, 0, 0, 0.24);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--brand-background-strong);
+    outline-offset: 3px;
+  }
+
+  &.hidden {
+    opacity: 0;
+    pointer-events: none;
+    transform: scale(0.8);
+  }
+
+  @include s {
+    // En móvil la navegación es una barra fija abajo: dejamos hueco para no taparla.
+    bottom: calc(88px + env(safe-area-inset-bottom));
+    right: 16px;
+    width: 48px;
+    height: 48px;
+
+    svg {
+      width: 20px;
+      height: 20px;
+    }
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .button {
+    transition: opacity 160ms ease;
+
+    &:hover {
+      transform: none;
+    }
+  }
+}
