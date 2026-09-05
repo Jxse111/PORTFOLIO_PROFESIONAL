@@ -1,499 +1,381 @@
-'use client';
+"use client";
 
-import { useState, useEffect, useRef } from 'react';
-import { Column, Button, Input } from '@once-ui-system/core';
+import {
+  CHAT_ASSISTANT_NAME,
+  CHAT_SUGGESTIONS,
+  CHAT_WELCOME_MESSAGE,
+} from "@/resources/chat-context";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { ChatMarkdown } from "./ChatMarkdown";
+import styles from "./ChatModal.module.scss";
 
 interface Message {
   id: string;
+  role: "user" | "model";
   text: string;
-  sender: 'user' | 'agent';
-  timestamp: Date;
-}
-
-interface StoredMessage {
-  id: string;
-  text: string;
-  sender: 'user' | 'agent';
-  timestamp?: string;
+  isError?: boolean;
 }
 
 interface ChatModalProps {
   onClose: () => void;
 }
 
-const CHAT_STORAGE_KEY = 'portfolio_chat_messages';
+const STORAGE_KEY = "portfolio_chat_messages";
+const MAX_LENGTH = 1000;
+
+const WELCOME: Message = {
+  id: "welcome",
+  role: "model",
+  text: CHAT_WELCOME_MESSAGE,
+};
 
 export default function ChatModal({ onClose }: ChatModalProps) {
-  const [messages, setMessages] = useState<Message[]>([]);
-  const [input, setInput] = useState('');
+  const [messages, setMessages] = useState<Message[]>([WELCOME]);
+  const [input, setInput] = useState("");
+  const [streamingText, setStreamingText] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const [isTyping, setIsTyping] = useState(false);
-  const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  const messagesRef = useRef<HTMLDivElement>(null);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const panelRef = useRef<HTMLDivElement>(null);
+  const abortRef = useRef<AbortController | null>(null);
+
+  /* --- Persistencia en la sesión --- */
+
   useEffect(() => {
-    const storedMessages = sessionStorage.getItem(CHAT_STORAGE_KEY);
-    if (storedMessages) {
-      try {
-        const parsedMessages = JSON.parse(storedMessages).map((msg: StoredMessage) => ({
-          ...msg,
-          timestamp: new Date(msg.timestamp || Date.now())
-        }));
-        setMessages(parsedMessages);
-      } catch (error) {
-        console.error('Error parsing stored messages:', error);
-        setMessages([]);
+    try {
+      const stored = sessionStorage.getItem(STORAGE_KEY);
+      if (stored) {
+        const parsed = JSON.parse(stored);
+        if (Array.isArray(parsed) && parsed.length > 0) setMessages(parsed);
       }
-    } else {
-      // Add a default welcome message if no stored messages
-      const welcomeMessage: Message = {
-        id: 'welcome',
-        text: 'Bienvenido al apartado de Chat,en que puedo ayudarte?',
-        sender: 'agent',
-        timestamp: new Date(),
-      };
-      setMessages([welcomeMessage]);
+    } catch {
+      sessionStorage.removeItem(STORAGE_KEY);
     }
   }, []);
 
-  // Save messages to sessionStorage whenever they change
   useEffect(() => {
-    if (messages.length > 0) {
-      sessionStorage.setItem(CHAT_STORAGE_KEY, JSON.stringify(messages));
-    }
-  }, [messages]);
-
-  // Auto scroll to bottom when new messages arrive
-  useEffect(() => {
-    scrollToBottom();
-  }, [messages]);
-
-  const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  };
-
-  const sendMessage = async () => {
-    if (!input.trim() || isLoading) return;
-
-    const userMessage: Message = {
-      id: Date.now().toString(),
-      text: input,
-      sender: 'user',
-      timestamp: new Date(),
-    };
-
-    setMessages((prev) => [...prev, userMessage]);
-    setInput('');
-    setIsLoading(true);
-    setIsTyping(true);
-
     try {
-      const response = await fetch('/api/chat', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ message: input }),
-      });
+      sessionStorage.setItem(STORAGE_KEY, JSON.stringify(messages));
+    } catch {
+      // sessionStorage lleno o bloqueado: el chat sigue funcionando sin persistir.
+    }
+  }, [messages]);
 
-      if (!response.ok) {
-        throw new Error('Failed to get response from agent');
+  /* --- Scroll automático --- */
+
+  // No se leen dentro, pero son justo los cambios que deben disparar el scroll.
+  // biome-ignore lint/correctness/useExhaustiveDependencies: dependencias intencionadas
+  useEffect(() => {
+    const el = messagesRef.current;
+    if (el) el.scrollTop = el.scrollHeight;
+  }, [messages, streamingText]);
+
+  /* --- Foco inicial, Escape y bloqueo del scroll de fondo --- */
+
+  useEffect(() => {
+    textareaRef.current?.focus();
+
+    const { overflow } = document.body.style;
+    document.body.style.overflow = "hidden";
+
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") onClose();
+    };
+    document.addEventListener("keydown", onKeyDown);
+
+    return () => {
+      document.removeEventListener("keydown", onKeyDown);
+      document.body.style.overflow = overflow;
+      abortRef.current?.abort();
+    };
+  }, [onClose]);
+
+  /* --- Envío --- */
+
+  const send = useCallback(
+    async (rawText: string) => {
+      const text = rawText.trim();
+      if (!text || isLoading) return;
+
+      const userMessage: Message = {
+        id: `u-${Date.now()}`,
+        role: "user",
+        text,
+      };
+
+      // El historial que enviamos excluye el saludo y los mensajes de error.
+      const history = messages
+        .filter((m) => m.id !== "welcome" && !m.isError)
+        .map((m) => ({ role: m.role, text: m.text }));
+
+      setMessages((prev) => [...prev, userMessage]);
+      setInput("");
+      setStreamingText("");
+      setIsLoading(true);
+
+      const controller = new AbortController();
+      abortRef.current = controller;
+
+      let accumulated = "";
+
+      try {
+        const response = await fetch("/api/chat", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ message: text, history }),
+          signal: controller.signal,
+        });
+
+        if (!response.ok) {
+          const data = await response.json().catch(() => ({}));
+          throw new Error(data.error || "El asistente no está disponible ahora mismo.");
+        }
+        if (!response.body) throw new Error("Respuesta vacía del asistente.");
+
+        const reader = response.body.getReader();
+        const decoder = new TextDecoder();
+
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+          accumulated += decoder.decode(value, { stream: true });
+          setStreamingText(accumulated);
+        }
+
+        if (!accumulated.trim()) {
+          throw new Error("No he podido generar una respuesta. Prueba a reformular la pregunta.");
+        }
+
+        setMessages((prev) => [
+          ...prev,
+          { id: `m-${Date.now()}`, role: "model", text: accumulated },
+        ]);
+      } catch (error) {
+        if (controller.signal.aborted) return;
+
+        setMessages((prev) => [
+          ...prev,
+          {
+            id: `e-${Date.now()}`,
+            role: "model",
+            text: error instanceof Error ? error.message : "Ha ocurrido un error inesperado.",
+            isError: true,
+          },
+        ]);
+      } finally {
+        if (!controller.signal.aborted) {
+          setStreamingText("");
+          setIsLoading(false);
+          abortRef.current = null;
+          textareaRef.current?.focus();
+        }
       }
+    },
+    [isLoading, messages],
+  );
 
-      const data = await response.json();
-      console.log('Full response from API:', data); // Log for debugging
+  const handleInput = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    setInput(e.target.value.slice(0, MAX_LENGTH));
+    const el = e.target;
+    el.style.height = "auto";
+    el.style.height = `${Math.min(el.scrollHeight, 120)}px`;
+  };
 
-      const agentMessage: Message = {
-        id: (Date.now() + 1).toString(),
-        text: data.response || data.output || data.message || data.text || data.result || 'Sorry, I could not understand that.',
-        sender: 'agent',
-        timestamp: new Date(),
-      };
-
-      setMessages((prev) => [...prev, agentMessage]);
-    } catch (error) {
-      console.error('Error sending message:', error);
-      const errorMessage: Message = {
-        id: (Date.now() + 1).toString(),
-        text: 'Error: Could not connect to the AI agent.',
-        sender: 'agent',
-        timestamp: new Date(),
-      };
-      setMessages((prev) => [...prev, errorMessage]);
-    } finally {
-      setIsLoading(false);
-      setIsTyping(false);
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    // Enter envía; Shift+Enter hace salto de línea.
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
+      send(input);
+      if (textareaRef.current) textareaRef.current.style.height = "auto";
     }
   };
 
-  const formatTime = (date: Date) => {
-    return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  const resetConversation = () => {
+    abortRef.current?.abort();
+    abortRef.current = null;
+    setIsLoading(false);
+    setStreamingText("");
+    setMessages([WELCOME]);
+    sessionStorage.removeItem(STORAGE_KEY);
+    textareaRef.current?.focus();
   };
+
+  const showSuggestions = messages.length === 1 && !isLoading;
 
   return (
-    <div className="chat-modal-overlay" onClick={onClose}>
-      <Column
-        maxWidth="m"
-        background="surface"
-        border="neutral-medium"
-        radius="l"
-        padding="l"
-        className="chat-modal"
-        onClick={(e) => e.stopPropagation()}
+    <div className={styles.overlay}>
+      {/* Botón real en lugar de un div con onClick: así cerrar al pulsar fuera
+          también funciona con teclado y lectores de pantalla. */}
+      <button
+        type="button"
+        className={styles.backdrop}
+        onClick={onClose}
+        aria-label="Cerrar chat"
+        tabIndex={-1}
+      />
+      <div
+        ref={panelRef}
+        className={styles.panel}
+        // biome-ignore lint/a11y/useSemanticElements: <dialog> nativo abriría con
+        // showModal() y su propio backdrop, incompatible con esta ventana anclada.
+        role="dialog"
+        aria-modal="true"
+        aria-label={`Chat con ${CHAT_ASSISTANT_NAME}`}
       >
-        <div className="chat-header">
-          <Button variant="tertiary" size="s" onClick={onClose} className="back-button">
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" className="icon icon-tabler icons-tabler-outline icon-tabler-chevron-left">
-              <title>Back</title>
-              <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
-              <path d="M15 6l-6 6l6 6" />
+        <header className={styles.header}>
+          <div className={styles.avatar} aria-hidden="true">
+            <svg aria-hidden="true" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M18 3a4 4 0 0 1 4 4v8a4 4 0 0 1 -4 4h-4.724l-4.762 2.857a1 1 0 0 1 -1.508 -.743l-.006 -.114v-2h-1a4 4 0 0 1 -3.995 -3.8l-.005 -.2v-8a4 4 0 0 1 4 -4zm-2.8 9.286a1 1 0 0 0 -1.414 .014a2.5 2.5 0 0 1 -3.572 0a1 1 0 0 0 -1.428 1.4a4.5 4.5 0 0 0 6.428 0a1 1 0 0 0 -.014 -1.414m-5.69 -4.286h-.01a1 1 0 1 0 0 2h.01a1 1 0 0 0 0 -2m5 0h-.01a1 1 0 0 0 0 2h.01a1 1 0 0 0 0 -2" />
             </svg>
-          </Button>
-          <div className="chat-title-center">
-            <div className="header-avatar">
-              <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="currentColor" className="icon icon-tabler icons-tabler-filled icon-tabler-message-chatbot">
-                <title>Chatbot Header Icon</title>
-                <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
-                <path d="M18 3a4 4 0 0 1 4 4v8a4 4 0 0 1 -4 4h-4.724l-4.762 2.857a1 1 0 0 1 -1.508 -.743l-.006 -.114v-2h-1a4 4 0 0 1 -3.995 -3.8l-.005 -.2v-8a4 4 0 0 1 4 -4zm-2.8 9.286a1 1 0 0 0 -1.414 .014a2.5 2.5 0 0 1 -3.572 0a1 1 0 0 0 -1.428 1.4a4.5 4.5 0 0 0 6.428 0a1 1 0 0 0 -.014 -1.414m-5.69 -4.286h-.01a1 1 0 1 0 0 2h.01a1 1 0 0 0 0 -2m5 0h-.01a1 1 0 0 0 0 2h.01a1 1 0 0 0 0 -2"/>
-              </svg>
-            </div>
-            <h3>Portfol-IA</h3>
-            <span className="online-status">{isTyping ? 'escribiendo...' : ''}</span>
           </div>
-          {/* Espacio para mantener centrado */}
-          <div className="header-spacer" />
-        </div>
-        <div className="chat-messages">
+
+          <div className={styles.headerText}>
+            <h2 className={styles.headerTitle}>{CHAT_ASSISTANT_NAME}</h2>
+            <span className={styles.headerStatus}>
+              {isLoading ? (
+                "escribiendo…"
+              ) : (
+                <>
+                  <span className={styles.statusDot} aria-hidden="true" />
+                  En línea
+                </>
+              )}
+            </span>
+          </div>
+
+          <div className={styles.headerActions}>
+            <button
+              type="button"
+              className={styles.iconButton}
+              onClick={resetConversation}
+              aria-label="Reiniciar conversación"
+              title="Reiniciar conversación"
+            >
+              <svg
+                aria-hidden="true"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <path d="M20 11a8.1 8.1 0 0 0 -15.5 -2m-.5 -4v4h4" />
+                <path d="M4 13a8.1 8.1 0 0 0 15.5 2m.5 4v-4h-4" />
+              </svg>
+            </button>
+            <button
+              type="button"
+              className={styles.iconButton}
+              onClick={onClose}
+              aria-label="Cerrar chat"
+              title="Cerrar"
+            >
+              <svg
+                aria-hidden="true"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <path d="M18 6l-12 12M6 6l12 12" />
+              </svg>
+            </button>
+          </div>
+        </header>
+
+        <div
+          className={styles.messages}
+          ref={messagesRef}
+          role="log"
+          aria-live="polite"
+          aria-label="Mensajes de la conversación"
+        >
           {messages.map((msg) => (
-            <div key={msg.id} className={`message-container ${msg.sender}`}>
-              <div className={`message ${msg.sender}`}>
-                <div className="message-avatar">
-                  {msg.sender === 'user' ? (
-                    <div className="avatar user-avatar">
-                      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor" className="icon icon-tabler icons-tabler-filled icon-tabler-user">
-                        <title>User Avatar</title>
-                        <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
-                        <path d="M12 2a5 5 0 1 1 -5 5l.005 -.217a5 5 0 0 1 4.995 -4.783z" />
-                        <path d="M14 14a5 5 0 0 1 5 5v1a2 2 0 0 1 -2 2h-10a2 2 0 0 1 -2 -2v-1a5 5 0 0 1 5 -5h4z" />
-                      </svg>
-                    </div>
-                  ) : (
-                    <div className="avatar agent-avatar">
-                      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor" className="icon icon-tabler icons-tabler-filled icon-tabler-message-chatbot">
-                        <title>Chatbot Avatar</title>
-                        <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
-                        <path d="M18 3a4 4 0 0 1 4 4v8a4 4 0 0 1 -4 4h-4.724l-4.762 2.857a1 1 0 0 1 -1.508 -.743l-.006 -.114v-2h-1a4 4 0 0 1 -3.995 -3.8l-.005 -.2v-8a4 4 0 0 1 4 -4zm-2.8 9.286a1 1 0 0 0 -1.414 .014a2.5 2.5 0 0 1 -3.572 0a1 1 0 0 0 -1.428 1.4a4.5 4.5 0 0 0 6.428 0a1 1 0 0 0 -.014 -1.414m-5.69 -4.286h-.01a1 1 0 1 0 0 2h.01a1 1 0 0 0 0 -2m5 0h-.01a1 1 0 0 0 0 2h.01a1 1 0 0 0 0 -2"/>
-                      </svg>
-                    </div>
-                  )}
-                </div>
-                <div className="message-content">
-                  <div className="message-bubble">
-                    <p>{msg.text}</p>
-                    {msg.id === 'welcome'}
-                  </div>
-                  <div className="message-time">
-                    {formatTime(msg.timestamp)}
-                  </div>
-                </div>
+            <div key={msg.id} className={`${styles.row} ${styles[msg.role]}`}>
+              <div className={`${styles.bubble} ${msg.isError ? styles.errorBubble : ""}`}>
+                <ChatMarkdown text={msg.text} />
               </div>
             </div>
           ))}
-          {isTyping && (
-            <div className="message-container agent">
-              <div className="message agent typing">
-                <div className="message-avatar">
-                  <div className="avatar agent-avatar">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor" className="icon icon-tabler icons-tabler-filled icon-tabler-message-chatbot">
-                    </svg>
+
+          {isLoading && (
+            <div className={`${styles.row} ${styles.model}`}>
+              <div className={styles.bubble}>
+                {streamingText ? (
+                  <>
+                    <ChatMarkdown text={streamingText} />
+                    <span className={styles.caret} aria-hidden="true" />
+                  </>
+                ) : (
+                  <div className={styles.typing} aria-label="Escribiendo">
+                    <span />
+                    <span />
+                    <span />
                   </div>
-                </div>
-                <div className="message-content">
-                  <div className="message-bubble typing">
-                    <div className="typing-indicator">
-                      <span />
-                      <span />
-                      <span />
-                    </div>
-                  </div>
-                </div>
+                )}
               </div>
             </div>
           )}
-          <div ref={messagesEndRef} />
         </div>
-        <div className="chat-input-area">
-          <Input
-            id="chat-input"
+
+        {showSuggestions && (
+          <div className={styles.suggestions}>
+            {CHAT_SUGGESTIONS.map((suggestion) => (
+              <button
+                key={suggestion}
+                type="button"
+                className={styles.suggestion}
+                onClick={() => send(suggestion)}
+              >
+                {suggestion}
+              </button>
+            ))}
+          </div>
+        )}
+
+        <div className={styles.inputArea}>
+          <textarea
+            ref={textareaRef}
+            className={styles.textarea}
             value={input}
-            onChange={(e) => setInput(e.target.value)}
-            placeholder="Escribe tu mensaje..."
+            onChange={handleInput}
+            onKeyDown={handleKeyDown}
+            placeholder="Escribe tu mensaje…"
+            rows={1}
+            maxLength={MAX_LENGTH}
             disabled={isLoading}
-            onKeyPress={(e) => e.key === 'Enter' && sendMessage()}
+            aria-label="Escribe tu mensaje"
           />
-          <Button onClick={sendMessage} disabled={isLoading} variant="primary">
-            {isLoading ? 'Enviando...' : 'Enviar'}
-
-          </Button>
+          <button
+            type="button"
+            className={styles.sendButton}
+            onClick={() => send(input)}
+            disabled={isLoading || !input.trim()}
+            aria-label="Enviar mensaje"
+          >
+            <svg
+              aria-hidden="true"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <path d="M10 14l11 -11" />
+              <path d="M21 3l-6.5 18a.55 .55 0 0 1 -1 0l-3.5 -7l-7 -3.5a.55 .55 0 0 1 0 -1l18 -6.5" />
+            </svg>
+          </button>
         </div>
-      </Column>
-      <style jsx>{`
-        .chat-modal-overlay {
-          position: fixed;
-          top: 0;
-          left: 0;
-          right: 0;
-          bottom: 0;
-          background-color: rgba(0, 0, 0, 0.1);
-          display: flex;
-          align-items: flex-end;
-          justify-content: flex-end;
-          z-index: 1001;
-          padding: 20px;
-        }
-        .chat-modal {
-          height: 450px;
-          width: 320px;
-          box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
-          margin-bottom: 20px;
-          display: flex;
-          flex-direction: column;
-          font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text', 'Segoe UI', Roboto, sans-serif;
-        }
-        .chat-header {
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-          padding: 12px 16px;
-          border-bottom: 1px solid var(--color-neutral-medium);
-          background-color: var(--color-surface);
-          position: relative;
-          min-height: 44px;
-        }
-        .chat-header::before {
-          content: '';
-          position: absolute;
-          top: 0;
-          left: 0;
-          right: 0;
-          height: 1px;
-          background: linear-gradient(90deg, transparent 0%, var(--color-neutral-medium) 20%, var(--color-neutral-medium) 80%, transparent 100%);
-        }
-        .chat-header-left {
-          display: flex;
-          align-items: center;
-          gap: 12px;
-        }
-        .chat-title-center {
-          position: absolute;
-          left: 50%;
-          transform: translateX(-50%);
-          text-align: center;
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-          gap: 4px;
-        }
-        .header-avatar {
-          width: 48px;
-          height: 48px;
-          border-radius: 50%;
-          background-color: #25d366;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          margin-bottom: 4px;
-        }
-        .header-avatar svg {
-          width: 32px;
-          height: 32px;
-        }
-        .header-spacer {
-          width: 40px;
-          height: 40px;
-        }
-        .back-button {
-          font-size: 20px;
-          min-width: 40px;
-          height: 40px;
-          border-radius: 50%;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-        }
-        .chat-header-info {
-          display: flex;
-          align-items: center;
-          gap: 12px;
-        }
-        .avatar {
-          width: 40px;
-          height: 40px;
-          border-radius: 50%;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          font-size: 18px;
-        }
-        .user-avatar {
-          background-color: #007bff;
-        }
-        .agent-avatar {
-          background-color: #25d366;
-        }
-        .chat-title h3 {
-          margin: 0;
-          font-size: 16px;
-          font-weight: 600;
-        }
-        .online-status {
-          font-size: 12px;
-          color:rgb(158, 158, 158);
-          font-weight: 500;
-        }
-        .chat-messages {
-          flex: 1;
-          overflow-y: auto;
-          padding: 20px 16px;
-          background-color: transparent;
-        }
-        .message-container {
-          display: flex;
-          margin-bottom: 8px;
-        }
-        .message-container.user {
-          justify-content: flex-end;
-        }
-        .message-container.agent {
-          justify-content: flex-start;
-        }
-        .message {
-          display: flex;
-          align-items: flex-end;
-          gap: 8px;
-          max-width: 85%;
-        }
-        .message.user {
-          flex-direction: row-reverse;
-        }
-        .message-avatar {
-          flex-shrink: 0;
-        }
-        .message-content {
-          flex: 1;
-        }
-        .message-bubble {
-          background-color: rgba(255, 255, 255, 0.9);
-          padding: 8px 12px;
-          border-radius: 18px;
-          box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-          word-wrap: break-word;
-          position: relative;
-          color: #333;
-          font-weight: 400;
-          backdrop-filter: blur(8px);
-        }
-        .message-container.user .message-bubble {
-          background-color: rgba(0, 123, 255, 0.9);
-          color: white;
-          border-bottom-right-radius: 4px;
-          font-weight: 400;
-          backdrop-filter: blur(8px);
-        }
-        .message-container.agent .message-bubble {
-          background-color: rgba(155, 155, 155, 0.9);
-          color: #333;
-          border-bottom-left-radius: 4px;
-          border: 1px solid rgba(155, 155, 155, 0.9);
-          backdrop-filter: blur(8px);
-        }
-        .message-bubble p {
-          margin: 0;
-          font-size: 14px;
-          line-height: 1.4;
-        }
-        .message-bubble.typing {
-          padding: 12px;
-        }
-        .typing-indicator {
-          display: flex;
-          gap: 4px;
-          align-items: center;
-        }
-        .typing-indicator span {
-          width: 6px;
-          height: 6px;
-          border-radius: 50%;
-          background-color: #999;
-          animation: typing 1.4s infinite ease-in-out;
-        }
-        .typing-indicator span:nth-child(1) {
-          animation-delay: -0.32s;
-        }
-        .typing-indicator span:nth-child(2) {
-          animation-delay: -0.16s;
-        }
-        .message-time {
-          font-size: 11px;
-          color: #999;
-          margin-top: 4px;
-          text-align: right;
-        }
-        .message-container.user .message-time {
-          text-align: left;
-        }
-        .chat-input-area {
-          display: flex;
-          gap: 8px;
-          padding: 16px 20px;
-          background-color: var(--color-surface);
-          border-top: 1px solid var(--color-neutral-medium);
-        }
-        .chat-input-area input {
-          flex: 1;
-          font-size: 14px;
-          border-radius: 20px;
-          border: 1px solid var(--color-neutral-medium);
-        }
 
-        @keyframes typing {
-          0%, 80%, 100% {
-            transform: scale(0.8);
-            opacity: 0.5;
-          }
-          40% {
-            transform: scale(1);
-            opacity: 1;
-          }
-        }
-
-        /* Mobile responsive styles */
-        @media (max-width: 768px) {
-          .chat-modal-overlay {
-            align-items: flex-end;
-            justify-content: center;
-            padding: 10px;
-          }
-          .chat-modal {
-            width: 100%;
-            height: 100vh;
-            max-height: none;
-            margin-bottom: 0;
-          }
-          .chat-header {
-            padding: 20px;
-          }
-          .avatar {
-            width: 45px;
-            height: 45px;
-            font-size: 20px;
-          }
-          .chat-messages {
-            padding: 16px;
-          }
-          .message-bubble p {
-            font-size: 16px;
-          }
-        }
-      `}</style>
+        <p className={styles.disclaimer}>
+          Asistente con IA. Puede equivocarse: para temas serios, escribe directamente.
+        </p>
+      </div>
     </div>
   );
 }
