@@ -13,8 +13,25 @@ import type {
 } from "@/types";
 import { home } from "./index";
 
-// IMPORTANT: Replace with your own domain address - it's used for SEO in meta tags and schema
-const baseURL: string = "https://portfolio-profesional-iota.vercel.app";
+/**
+ * Dominio del sitio. Se usa en las meta etiquetas, el sitemap, las URLs canónicas
+ * y las imágenes de vista previa al compartir el enlace.
+ *
+ * Orden de preferencia:
+ *  1. NEXT_PUBLIC_SITE_URL, si la defines (imprescindible con dominio propio).
+ *  2. El dominio de producción que Vercel inyecta automáticamente.
+ *  3. El valor de reserva de abajo.
+ *
+ * Si apunta a un dominio equivocado, al compartir el enlace no aparece la tarjeta
+ * con imagen y el sitemap le da a Google URLs que no existen.
+ */
+const FALLBACK_URL = "https://portfolio-profesional-iota.vercel.app";
+
+const vercelURL = process.env.NEXT_PUBLIC_VERCEL_PROJECT_PRODUCTION_URL;
+
+const baseURL: string = (
+  process.env.NEXT_PUBLIC_SITE_URL || (vercelURL ? `https://${vercelURL}` : FALLBACK_URL)
+).replace(/\/$/, "");
 
 const routes: RoutesConfig = {
   "/": true,

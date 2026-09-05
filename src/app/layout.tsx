@@ -17,6 +17,7 @@ import {
 } from "@once-ui-system/core";
 import { Footer, Header, RouteGuard, Providers } from "@/components";
 import FloatingChatButton from "@/components/FloatingChatButton";
+import { StructuredData } from "@/components/StructuredData";
 import { baseURL, effects, fonts, style, dataStyle, home } from "@/resources";
 
 export async function generateMetadata() {
@@ -62,6 +63,7 @@ export default async function RootLayout({
       )}
     >
       <head>
+        <StructuredData />
         <script
           id="theme-init"
           dangerouslySetInnerHTML={{
