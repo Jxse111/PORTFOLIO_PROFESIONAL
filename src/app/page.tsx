@@ -10,7 +10,7 @@ import {
   Schema,
   Meta,
 } from "@once-ui-system/core";
-import { home, about, person, baseURL, routes } from "@/resources";
+import { home, about, person, work, baseURL, routes } from "@/resources";
 import { Mailchimp } from "@/components";
 import { Projects } from "@/components/work/Projects";
 import { LatestNews } from "@/components/news/LatestNews";
@@ -102,8 +102,12 @@ export default async function Home() {
       <RevealFx translateY="8" delay={0.3}>
         <Projects range={[1, 1]} />
       </RevealFx>
+      <Row fillWidth horizontal="center">
+        <Button href={work.path} variant="tertiary" size="s" data-border="rounded" arrowIcon>
+          Ver todos los proyectos
+        </Button>
+      </Row>
       {routes["/noticias"] && <LatestNews />}
-      <Projects range={[2]} />
       <Mailchimp />
     </Column>
   );
