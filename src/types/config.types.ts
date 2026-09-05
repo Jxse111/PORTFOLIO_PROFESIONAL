@@ -148,7 +148,7 @@ export type SameAsConfig = {
 };
 
 /**
- * Social sharing configuration for blog posts.
+ * Social sharing configuration for shared pages.
  */
 export type SocialSharingConfig = {
   display: boolean;

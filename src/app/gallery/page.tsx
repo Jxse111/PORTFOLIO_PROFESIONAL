@@ -1,5 +1,7 @@
 import { Column, Heading, Meta, Schema } from "@once-ui-system/core";
 import GalleryView from "@/components/gallery/GalleryView";
+import GalleryUpload from "@/components/gallery/GalleryUpload";
+import { getGalleryImages } from "@/lib/gallery/images";
 import { baseURL, gallery, person } from "@/resources";
 
 export async function generateMetadata() {
@@ -12,7 +14,12 @@ export async function generateMetadata() {
   });
 }
 
-export default function Gallery() {
+/** Las imágenes subidas se leen en cada visita, no en el build. */
+export const dynamic = "force-dynamic";
+
+export default async function Gallery() {
+  const images = await getGalleryImages();
+
   return (
     <Column maxWidth="l" fillWidth paddingTop="24" gap="24">
       <Schema
@@ -31,7 +38,8 @@ export default function Gallery() {
       <Heading as="h1" variant="display-strong-s" align="center">
         {gallery.title}
       </Heading>
-      <GalleryView />
+      <GalleryUpload />
+      <GalleryView images={images} />
     </Column>
   );
 }

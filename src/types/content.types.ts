@@ -25,6 +25,12 @@ export type Person = {
   email: string;
   /** IANA time zone location */
   location: IANATimeZone;
+  /** Ciudad y país para mostrar a los visitantes (la zona horaria no es una ubicación legible) */
+  city: string;
+  /** Región/provincia, usada en los datos estructurados de SEO local */
+  region?: string;
+  /** Código de país ISO 3166-1 alfa-2, usado en los datos estructurados */
+  countryCode?: string;
   /** Languages spoken */
   languages?: string[];
 };
@@ -210,10 +216,10 @@ export interface About extends BasePageConfig {
 }
 
 /**
- * Blog page configuration.
- * @description Configuration for the Blog page, including metadata and navigation label.
+ * News page configuration.
+ * @description Configuración de la página de Noticias (agregador RSS de Apple, IA y tecnología).
  */
-export interface Blog extends BasePageConfig {}
+export interface News extends BasePageConfig {}
 
 /**
  * Work/projects page configuration.
