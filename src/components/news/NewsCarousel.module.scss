@@ -1,0 +1,73 @@
+.wrapper {
+  position: relative;
+  width: 100%;
+}
+
+.track {
+  display: flex;
+  gap: var(--static-space-16);
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  scroll-behavior: smooth;
+  scrollbar-width: none;
+  padding: var(--static-space-4) var(--static-space-2) var(--static-space-12);
+}
+
+.track::-webkit-scrollbar {
+  display: none;
+}
+
+.slide {
+  flex: 0 0 320px;
+  max-width: 320px;
+  scroll-snap-align: start;
+}
+
+@media (max-width: 768px) {
+  .slide {
+    flex-basis: 78%;
+    max-width: 78%;
+  }
+}
+
+.arrow {
+  position: absolute;
+  top: 32%;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: 1px solid var(--neutral-alpha-medium);
+  background: var(--page-background);
+  color: var(--neutral-on-background-strong);
+  cursor: pointer;
+  transition: opacity 200ms var(--transition-eased), transform 200ms var(--transition-eased);
+  box-shadow: var(--shadow-m);
+}
+
+.arrow:hover {
+  transform: scale(1.08);
+}
+
+.arrow:disabled {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.prev {
+  left: -14px;
+}
+
+.next {
+  right: -14px;
+}
+
+/* En móvil el gesto de swipe basta: las flechas estorban */
+@media (max-width: 768px) {
+  .arrow {
+    display: none;
+  }
+}

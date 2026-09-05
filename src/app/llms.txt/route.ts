@@ -1,5 +1,5 @@
 import { baseURL } from "@/resources";
-import { about, blog, gallery, home, person, social, work } from "@/resources/content";
+import { about, news, gallery, home, person, social, work } from "@/resources/content";
 import { getPosts } from "@/utils/utils";
 
 /**
@@ -17,13 +17,6 @@ export const dynamic = "force-static";
 export const revalidate = 86400;
 
 export function GET() {
-  const posts = getPosts(["src", "app", "blog", "posts"])
-    .sort(
-      (a, b) =>
-        new Date(b.metadata.publishedAt).getTime() - new Date(a.metadata.publishedAt).getTime(),
-    )
-    .slice(0, 10);
-
   const projects = getPosts(["src", "app", "work", "projects"]);
 
   const enlaces = social
@@ -68,7 +61,7 @@ ${about.studies.institutions.map((i) => `- ${i.name}`).join("\n")}
 - [${home.label}](${baseURL}/): presentación y proyecto destacado
 - [${about.label}](${baseURL}${about.path}): experiencia, formación y habilidades
 - [${work.label}](${baseURL}${work.path}): proyectos desarrollados
-- [${blog.label}](${baseURL}${blog.path}): artículos sobre desarrollo y tecnología
+- [${news.label}](${baseURL}${news.path}): noticias de Apple, inteligencia artificial y tecnología, agregadas automáticamente desde medios especializados
 - [${gallery.label}](${baseURL}${gallery.path}): galería de fotografías
 
 ## Proyectos
@@ -81,10 +74,6 @@ ${projects
       }`,
   )
   .join("\n")}
-
-## Artículos recientes
-
-${posts.map((p) => `- [${p.metadata.title}](${baseURL}/blog/${p.slug})`).join("\n")}
 
 ## Enlaces
 

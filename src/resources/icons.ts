@@ -12,6 +12,13 @@ import {
   HiOutlineDocument,
   HiOutlineGlobeAsiaAustralia,
   HiOutlineRocketLaunch,
+  HiOutlineNewspaper,
+  HiOutlineSparkles,
+  HiOutlineCpuChip,
+  HiChevronLeft,
+  HiChevronRight,
+  HiOutlineMagnifyingGlass,
+  HiOutlineFire,
 } from "react-icons/hi2";
 
 import {
@@ -28,6 +35,8 @@ import {
   SiFigma,
   SiSupabase,
 } from "react-icons/si";
+
+import { FaApple } from "react-icons/fa6";
 
 import { FaDiscord, FaGithub, FaLinkedin, FaX, FaThreads, FaXTwitter, FaFacebook, FaPinterest, FaWhatsapp, FaReddit, FaTelegram, } from "react-icons/fa6";
 
@@ -63,6 +72,14 @@ export const iconLibrary: Record<string, IconType> = {
   whatsapp: FaWhatsapp,
   reddit: FaReddit,
   telegram: FaTelegram,
+  newspaper: HiOutlineNewspaper,
+  sparkles: HiOutlineSparkles,
+  chip: HiOutlineCpuChip,
+  chevronLeft: HiChevronLeft,
+  chevronRight: HiChevronRight,
+  search: HiOutlineMagnifyingGlass,
+  fire: HiOutlineFire,
+  apple: FaApple,
 };
 
 export type IconLibrary = typeof iconLibrary;

@@ -9,13 +9,11 @@ import {
   Row,
   Schema,
   Meta,
-  Line,
 } from "@once-ui-system/core";
 import { home, about, person, baseURL, routes } from "@/resources";
 import { Mailchimp } from "@/components";
 import { Projects } from "@/components/work/Projects";
-import Posts from "@/components/blog/Posts";
-import { getServerPosts } from "@/utils/server-utils";
+import { LatestNews } from "@/components/news/LatestNews";
 
 export async function generateMetadata() {
   return Meta.generate({
@@ -28,11 +26,6 @@ export async function generateMetadata() {
 }
 
 export default async function Home() {
-  // Obtener los posts más recientes ordenados por fecha
-  const recentPosts = getServerPosts().sort((a, b) =>
-    new Date(b.metadata.publishedAt).getTime() - new Date(a.metadata.publishedAt).getTime()
-  ).slice(0, 2); // Tomar solo los 2 posts más recientes
-
   return (
     <Column maxWidth="m" gap="xl" paddingY="12" horizontal="center">
       <Schema
@@ -109,26 +102,7 @@ export default async function Home() {
       <RevealFx translateY="8" delay={0.3}>
         <Projects range={[1, 1]} />
       </RevealFx>
-      {routes["/blog"] && (
-        <Column fillWidth gap="24" marginBottom="l">
-          <Row fillWidth paddingRight="64">
-            <Line maxWidth={48} />
-          </Row>
-          <Row fillWidth gap="24" marginTop="40" s={{ direction: "column" }}>
-            <Row flex={1} paddingLeft="l" paddingTop="24">
-              <Heading as="h2" variant="display-strong-xs" wrap="balance">
-                Últimas entradas
-              </Heading>
-            </Row>
-            <Row flex={3} paddingX="20">
-              <Posts posts={recentPosts} columns="2" />
-            </Row>
-          </Row>
-          <Row fillWidth paddingLeft="64" horizontal="end">
-            <Line maxWidth={48} />
-          </Row>
-        </Column>
-      )}
+      {routes["/noticias"] && <LatestNews />}
       <Projects range={[2]} />
       <Mailchimp />
     </Column>

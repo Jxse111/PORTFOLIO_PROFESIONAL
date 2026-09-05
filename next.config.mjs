@@ -18,6 +18,13 @@ const nextConfig = {
       },
     ],
   },
+  // El blog se retiró en favor de /noticias: redirigimos las URLs ya indexadas.
+  async redirects() {
+    return [
+      { source: "/blog", destination: "/noticias", permanent: true },
+      { source: "/blog/:slug", destination: "/noticias", permanent: true },
+    ];
+  },
   sassOptions: {
     compiler: "modern",
     silenceDeprecations: ["legacy-js-api"],

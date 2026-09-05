@@ -1,4 +1,4 @@
-import type { About, Blog, Gallery, Home, Newsletter, Person, Social, Work } from "@/types";
+import type { About, News, Gallery, Home, Newsletter, Person, Social, Work } from "@/types";
 import { Line, Logo, Row, Text } from "@once-ui-system/core";
 
 const person: Person = {
@@ -259,13 +259,12 @@ const about: About = {
   },
 };
 
-const blog: Blog = {
-  path: "/blog",
-  label: "Blog",
-  title: "Escribiendo sobre desarrollo y nuevas tecnologías...",
-  description: `Artículos de ${person.firstName} ${person.lastName} sobre desarrollo web, programación y nuevas tecnologías.`,
-  // Create new blog posts by adding a new .mdx file to app/blog/posts
-  // All posts will be listed on the /blog route
+const news: News = {
+  path: "/noticias",
+  label: "Noticias",
+  title: "Noticias de Apple, IA y tecnología",
+  description: `Últimas noticias de Apple, inteligencia artificial y tecnología, seleccionadas y actualizadas automáticamente en el portfolio de ${person.firstName} ${person.lastName}.`,
+  // Las fuentes RSS se configuran en src/lib/news/sources.ts
 };
 
 const work: Work = {
@@ -273,7 +272,7 @@ const work: Work = {
   label: "Proyectos",
   title: `Mis proyectos`,
   description: `Proyectos web desarrollados por ${person.firstName} ${person.lastName}: aplicaciones a medida para empresas y clientes.`,
-  // Create new project pages by adding a new .mdx file to app/blog/posts
+  // Create new project pages by adding a new .mdx file to app/work/projects
   // All projects will be listed on the /home and /work routes
 };
 
@@ -313,4 +312,4 @@ const gallery: Gallery = {
   ],
 };
 
-export { person, social, newsletter, home, about, blog, work, gallery };
+export { person, social, newsletter, home, about, news, work, gallery };

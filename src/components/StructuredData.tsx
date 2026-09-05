@@ -1,5 +1,5 @@
 import { baseURL } from "@/resources";
-import { about, blog, home, person, social, work } from "@/resources/content";
+import { about, news, home, person, social, work } from "@/resources/content";
 
 /**
  * Datos estructurados (JSON-LD) de schema.org.
@@ -85,7 +85,7 @@ export function StructuredData() {
       { name: home.label, path: home.path },
       { name: about.label, path: about.path },
       { name: work.label, path: work.path },
-      { name: blog.label, path: blog.path },
+      { name: news.label, path: news.path },
     ].map((item, index) => ({
       "@type": "ListItem",
       position: index + 1,

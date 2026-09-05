@@ -45,7 +45,7 @@ export default function UnsubscribePage() {
     <Column maxWidth="s" paddingTop="24" gap="16">
       <Heading variant="heading-strong-xl" marginBottom="8">Darse de baja</Heading>
       <Text variant="body-default-m" onBackground="neutral-weak">
-        Introduce tu correo para dejar de recibir notificaciones del blog.
+        Introduce tu correo para dejar de recibir notificaciones.
       </Text>
       <form onSubmit={onSubmit}>
         <Row fillWidth gap="8" s={{ direction: "column" }}>

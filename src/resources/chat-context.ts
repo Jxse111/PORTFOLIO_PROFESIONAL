@@ -18,12 +18,12 @@ export const CHAT_SUGGESTIONS = [
 ];
 
 const SITE_MAP = `
-- "/" (Inicio): presentación, proyecto destacado (ESQUILS) y últimas entradas del blog.
+- "/" (Inicio): presentación, proyecto destacado (ESQUILS) y carrusel con las últimas noticias.
 - "/about" (Sobre Mí): biografía, experiencia laboral, estudios y habilidades técnicas. También hay un botón para agendar una llamada.
 - "/work" (Proyectos): listado completo de proyectos. Cada proyecto tiene su propia página, p. ej. "/work/Esquils".
-- "/blog" (Blog): artículos sobre desarrollo y tecnología, con buscador, filtros por categoría y ordenación.
+- "/noticias" (Noticias): agregador automático de noticias de Apple, inteligencia artificial y tecnología, con buscador y filtros por categoría. Cada noticia enlaza a su medio original.
 - "/gallery" (Galería de imágenes): álbum de fotografías personales.
-- El boletín (newsletter) se puede suscribir desde el pie de página y desde el blog.
+- El boletín (newsletter) se puede suscribir desde el pie de página.
 - En la cabecera hay un botón para cambiar entre modo claro y oscuro.
 `.trim();
 

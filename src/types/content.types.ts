@@ -216,10 +216,10 @@ export interface About extends BasePageConfig {
 }
 
 /**
- * Blog page configuration.
- * @description Configuration for the Blog page, including metadata and navigation label.
+ * News page configuration.
+ * @description Configuración de la página de Noticias (agregador RSS de Apple, IA y tecnología).
  */
-export interface Blog extends BasePageConfig {}
+export interface News extends BasePageConfig {}
 
 /**
  * Work/projects page configuration.
