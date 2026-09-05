@@ -1,5 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
-import { adminEmail, createChallengeToken, generateCode, cookieOptions, CHALLENGE_COOKIE } from "@/lib/gallery/auth";
+import {
+  adminEmail,
+  createChallengeToken,
+  generateCode,
+  missingConfig,
+  cookieOptions,
+  CHALLENGE_COOKIE,
+} from "@/lib/gallery/auth";
 import { sendGalleryCode } from "@/lib/email";
 
 export const runtime = "nodejs";
@@ -18,12 +25,22 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ message: "Introduce un correo válido" }, { status: 400 });
   }
 
-  const allowed = adminEmail();
+  // Se valida toda la configuración antes de enviar nada: si falta algo, no
+  // tiene sentido gastar un envío para fallar justo después.
+  const missing = missingConfig();
 
-  if (!allowed) {
-    console.error("GALLERY_ADMIN_EMAIL no está configurada");
-    return NextResponse.json({ message: "Subida no configurada" }, { status: 500 });
+  if (missing.length > 0) {
+    console.error("[gallery] configuración incompleta:", missing.join(", "));
+    return NextResponse.json(
+      {
+        message: `Faltan variables de entorno en el servidor: ${missing.join(", ")}`,
+        missing,
+      },
+      { status: 500 },
+    );
   }
+
+  const allowed = adminEmail() as string;
 
   // Si el correo no es el autorizado respondemos igual que si lo fuera, para no
   // revelar cuál es la dirección válida. Simplemente no se envía nada.

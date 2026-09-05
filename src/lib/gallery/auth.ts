@@ -113,3 +113,26 @@ export const cookieOptions = {
     maxAge: SESSION_TTL_MS / 1000,
   },
 };
+
+/**
+ * Comprueba la configuración necesaria ANTES de enviar nada.
+ *
+ * Devuelve los nombres de las variables que faltan (nunca sus valores). Esos
+ * nombres ya están publicados en `.env.example`, así que exponerlos no añade
+ * ningún riesgo y evita tener que rebuscar en los logs para diagnosticar.
+ */
+export function missingConfig(): string[] {
+  const missing: string[] = [];
+
+  const authSecret = process.env.GALLERY_AUTH_SECRET;
+  if (!authSecret) missing.push("GALLERY_AUTH_SECRET");
+  else if (authSecret.length < 32) missing.push("GALLERY_AUTH_SECRET (demasiado corta)");
+
+  if (!process.env.GALLERY_ADMIN_EMAIL) missing.push("GALLERY_ADMIN_EMAIL");
+  if (!process.env.SMTP_HOST) missing.push("SMTP_HOST");
+  if (!process.env.SMTP_PORT) missing.push("SMTP_PORT");
+  if (!process.env.SMTP_USER) missing.push("SMTP_USER");
+  if (!process.env.SMTP_PASS) missing.push("SMTP_PASS");
+
+  return missing;
+}
