@@ -16,6 +16,12 @@ const nextConfig = {
         hostname: "www.google.com",
         pathname: "**",
       },
+      {
+        // Imágenes de la galería subidas a Vercel Blob.
+        protocol: "https",
+        hostname: "*.public.blob.vercel-storage.com",
+        pathname: "**",
+      },
     ],
   },
   // El blog se retiró en favor de /noticias: redirigimos las URLs ya indexadas.
