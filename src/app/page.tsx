@@ -14,6 +14,7 @@ import { home, about, person, work, baseURL, routes } from "@/resources";
 import { Mailchimp } from "@/components";
 import { Projects } from "@/components/work/Projects";
 import { LatestNews } from "@/components/news/LatestNews";
+import { TechStack } from "@/components/TechStack";
 
 export async function generateMetadata() {
   return Meta.generate({
@@ -69,12 +70,20 @@ export default async function Home() {
               {home.headline}
             </Heading>
           </RevealFx>
-          <RevealFx translateY="4" delay={0.1} fillWidth horizontal="center" paddingBottom="32">
+          <RevealFx translateY="4" delay={0.1} fillWidth horizontal="center" paddingBottom="16">
             <Text wrap="balance" onBackground="neutral-weak" variant="heading-default-xl">
               {home.subline}
             </Text>
           </RevealFx>
-          <RevealFx paddingTop="12" delay={0.2} horizontal="center" paddingLeft="12">
+          <RevealFx translateY="4" delay={0.15} fillWidth horizontal="center" paddingBottom="24">
+            <Text wrap="balance" onBackground="neutral-medium" variant="body-default-m">
+              {home.intro}
+            </Text>
+          </RevealFx>
+          <RevealFx translateY="4" delay={0.2} fillWidth horizontal="center" paddingBottom="24">
+            <TechStack />
+          </RevealFx>
+          <RevealFx paddingTop="8" delay={0.25} horizontal="center" paddingLeft="12">
             <Button
               id="about"
               data-border="rounded"

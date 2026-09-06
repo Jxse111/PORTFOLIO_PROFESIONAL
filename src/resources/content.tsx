@@ -23,6 +23,12 @@ const newsletter: Newsletter = {
   ),
 };
 
+/** Contacto directo por WhatsApp, usado por el botón flotante de contacto. */
+const whatsapp = {
+  number: "34644497129",
+  url: "https://wa.me/34644497129",
+};
+
 const social: Social = [
   {
     name: "GitHub",
@@ -68,6 +74,24 @@ const home: Home = {
       <br /> Después del trabajo desarrollo mis propios proyectos y sigo formándome.
     </>
   ),
+  /** Frase corta bajo el titular: qué hago exactamente, sin rodeos. */
+  intro: (
+    <>
+      Desarrollador web full-stack en {person.city}. Construyo aplicaciones a medida para empresas:
+      la interfaz, la lógica de servidor, la base de datos y el despliegue.
+    </>
+  ),
+  /** Tecnologías principales, para el vistazo rápido de quien revisa el perfil. */
+  stack: [
+    { name: "Next.js", icon: "nextjs" },
+    { name: "React", icon: "react" },
+    { name: "TypeScript", icon: "typescript" },
+    { name: "Angular", icon: "angular" },
+    { name: "PHP", icon: "php" },
+    { name: "Java", icon: "java" },
+    { name: "MySQL", icon: "mysql" },
+    { name: "Docker", icon: "docker" },
+  ],
 };
 
 const about: About = {
@@ -312,4 +336,4 @@ const gallery: Gallery = {
   ],
 };
 
-export { person, social, newsletter, home, about, news, work, gallery };
+export { person, social, whatsapp, newsletter, home, about, news, work, gallery };

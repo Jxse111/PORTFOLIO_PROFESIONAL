@@ -81,3 +81,40 @@
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
+
+/**
+ * Disposición compacta en móvil.
+ *
+ * A pantalla completa la tarjeta mide ~380px de alto y solo entran dos por
+ * pantalla. Con la imagen a la izquierda baja a ~120px y se ven cuatro o cinco,
+ * que es lo que se espera al ojear titulares. Solo se aplica a las tarjetas de
+ * la rejilla: las del carrusel siguen siendo verticales.
+ */
+@media (max-width: 640px) {
+  .compactOnMobile {
+    flex-direction: row;
+    align-items: stretch;
+  }
+
+  .compactOnMobile .thumbWrapper {
+    width: 116px;
+    flex-shrink: 0;
+    aspect-ratio: 1 / 1;
+  }
+
+  .compactOnMobile .title {
+    -webkit-line-clamp: 3;
+    line-clamp: 3;
+  }
+
+  .compactOnMobile .summary {
+    display: none;
+  }
+}
+
+/* El texto de fuente y fecha era demasiado pequeño para leerlo en la mano. */
+@media (max-width: 768px) {
+  .meta {
+    font-size: 12.5px;
+  }
+}

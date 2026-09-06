@@ -16,6 +16,7 @@ import { baseURL, about, person, social } from "@/resources";
 import TableOfContents from "@/components/about/TableOfContents";
 import styles from "@/components/about/about.module.scss";
 import React from "react";
+import { assertRouteEnabled } from "@/utils/route-guard";
 
 export async function generateMetadata() {
   return Meta.generate({
@@ -28,6 +29,8 @@ export async function generateMetadata() {
 }
 
 export default function About() {
+  assertRouteEnabled("/about");
+
   const structure = [
     {
       title: about.intro.title,

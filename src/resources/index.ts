@@ -2,6 +2,7 @@
 export {
   person,
   social,
+  whatsapp,
   newsletter,
   home,
   about,

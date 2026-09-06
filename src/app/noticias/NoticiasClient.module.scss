@@ -1,8 +1,19 @@
 .filters {
-  position: sticky;
+  /* Once UI aplica su propia clase .position-relative al Column, que gana por
+     especificidad: por eso hace falta reforzar aquí el sticky. */
+  position: sticky !important;
   top: 0;
   z-index: 3;
+  background: var(--page-background);
   backdrop-filter: blur(12px);
+}
+
+@media (max-width: 768px) {
+  .filters {
+    /* En móvil la cabecera no ocupa la parte superior, así que se pega arriba
+       del todo con un poco de aire. */
+    top: var(--static-space-8);
+  }
 }
 
 .searchInput {
@@ -24,6 +35,14 @@
 
 .searchInput:focus {
   border-color: var(--brand-alpha-strong);
+}
+
+@media (max-width: 768px) {
+  .searchInput {
+    /* Por debajo de 16px, Safari en iOS hace zoom al enfocar el campo y
+       descuadra la página. */
+    font-size: 16px;
+  }
 }
 
 .tab {
@@ -53,6 +72,28 @@
   color: var(--brand-on-background-strong);
 }
 
+.tabWrapper {
+  position: relative;
+}
+
+/* Degradado en el borde derecho para que se vea que hay más categorías. */
+.tabWrapper::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 40px;
+  height: 100%;
+  pointer-events: none;
+  background: linear-gradient(to right, transparent, var(--page-background));
+  opacity: 1;
+  transition: opacity 200ms var(--transition-eased);
+}
+
+.tabWrapper.atEnd::after {
+  opacity: 0;
+}
+
 .tabScroller {
   display: flex;
   gap: var(--static-space-8);
@@ -80,5 +121,12 @@
 @media (max-width: 640px) {
   .grid {
     grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 768px) {
+  .tab {
+    font-size: 13px;
+    padding: var(--static-space-12) var(--static-space-16);
   }
 }
