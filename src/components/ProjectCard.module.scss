@@ -1,0 +1,25 @@
+.techList {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--static-space-8);
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.techItem {
+  padding: var(--static-space-4) var(--static-space-12);
+  border: 1px solid var(--neutral-alpha-weak);
+  border-radius: 9999px;
+  background: var(--neutral-alpha-weak);
+  color: var(--neutral-on-background-medium);
+  font-family: var(--font-family-body);
+  font-size: var(--font-size-label-s);
+  white-space: nowrap;
+}
+
+@media (max-width: 640px) {
+  .techItem {
+    font-size: 12.5px;
+  }
+}

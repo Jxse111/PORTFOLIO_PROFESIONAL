@@ -18,6 +18,8 @@ type Metadata = {
   tag?: string;
   team: Team[];
   link?: string;
+  /** Tecnologías del proyecto, declaradas en el frontmatter del .mdx */
+  technologies?: string[];
 };
 
 import { notFound } from "next/navigation";
@@ -47,6 +49,7 @@ function readMDXFile(filePath: string) {
     tag: data.tag || [],
     team: data.team || [],
     link: data.link || "",
+    technologies: Array.isArray(data.technologies) ? data.technologies : [],
   };
 
   return { metadata, content };

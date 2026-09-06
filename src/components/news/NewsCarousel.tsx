@@ -4,6 +4,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { Icon } from "@once-ui-system/core";
 import type { NewsItem } from "@/lib/news/types";
 import { NewsCard } from "./NewsCard";
+import { pickBreakingIds } from "@/lib/news/format";
 import styles from "./NewsCarousel.module.scss";
 
 interface NewsCarouselProps {
@@ -12,6 +13,7 @@ interface NewsCarouselProps {
 
 export function NewsCarousel({ items }: NewsCarouselProps) {
   const trackRef = useRef<HTMLDivElement>(null);
+  const breakingIds = pickBreakingIds(items);
   const [atStart, setAtStart] = useState(true);
   const [atEnd, setAtEnd] = useState(false);
 
@@ -60,7 +62,7 @@ export function NewsCarousel({ items }: NewsCarouselProps) {
       >
         {items.map((item) => (
           <div key={item.id} className={styles.slide}>
-            <NewsCard item={item} showSummary={false} />
+            <NewsCard item={item} showSummary={false} allowBreaking={breakingIds.has(item.id)} />
           </div>
         ))}
       </div>

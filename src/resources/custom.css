@@ -52,3 +52,20 @@
   --scheme-neutral-600-50: rgba(137,152,159,0.5);
   /*
 }*/
+/**
+ * Foco visible al navegar con el teclado.
+ *
+ * Sin esto no se ve dónde estás al tabular: además de ser un problema de
+ * accesibilidad, da sensación de web sin terminar. Solo se aplica a :focus-visible,
+ * así que no aparece al hacer clic con el ratón.
+ */
+a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+textarea:focus-visible,
+select:focus-visible,
+[tabindex]:focus-visible {
+  outline: 2px solid var(--brand-solid-strong, #17c0fd);
+  outline-offset: 3px;
+  border-radius: var(--radius-s);
+}
