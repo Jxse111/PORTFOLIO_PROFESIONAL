@@ -35,7 +35,15 @@ import {
   SiNextdotjs,
   SiFigma,
   SiSupabase,
+  SiReact,
+  SiTypescript,
+  SiAngular,
+  SiPhp,
+  SiMysql,
+  SiDocker,
 } from "react-icons/si";
+
+import { FaJava } from "react-icons/fa6";
 
 import { FaApple } from "react-icons/fa6";
 
@@ -82,6 +90,13 @@ export const iconLibrary: Record<string, IconType> = {
   fire: HiOutlineFire,
   apple: FaApple,
   plus: HiPlus,
+  react: SiReact,
+  typescript: SiTypescript,
+  angular: SiAngular,
+  php: SiPhp,
+  mysql: SiMysql,
+  docker: SiDocker,
+  java: FaJava,
 };
 
 export type IconLibrary = typeof iconLibrary;

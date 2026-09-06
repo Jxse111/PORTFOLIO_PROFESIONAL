@@ -3,6 +3,7 @@ import GalleryView from "@/components/gallery/GalleryView";
 import GalleryUpload from "@/components/gallery/GalleryUpload";
 import { getGalleryImages } from "@/lib/gallery/images";
 import { baseURL, gallery, person } from "@/resources";
+import { assertRouteEnabled } from "@/utils/route-guard";
 
 export async function generateMetadata() {
   return Meta.generate({
@@ -18,6 +19,8 @@ export async function generateMetadata() {
 export const dynamic = "force-dynamic";
 
 export default async function Gallery() {
+  assertRouteEnabled("/gallery");
+
   const images = await getGalleryImages();
 
   return (

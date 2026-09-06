@@ -105,6 +105,15 @@ export interface Home extends BasePageConfig {
   };
   /** The sub text which appears below the headline */
   subline: React.ReactNode;
+  /** Frase corta que concreta a qué se dedica, bajo el subtítulo */
+  intro: React.ReactNode;
+  /** Tecnologías principales mostradas en la portada */
+  stack: Array<{
+    /** Nombre visible de la tecnología */
+    name: string;
+    /** Clave del icono en `iconLibrary` (src/resources/icons.ts) */
+    icon: string;
+  }>;
 }
 
 /**

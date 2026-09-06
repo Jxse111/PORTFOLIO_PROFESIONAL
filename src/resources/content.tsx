@@ -74,6 +74,24 @@ const home: Home = {
       <br /> Después del trabajo desarrollo mis propios proyectos y sigo formándome.
     </>
   ),
+  /** Frase corta bajo el titular: qué hago exactamente, sin rodeos. */
+  intro: (
+    <>
+      Desarrollador web full-stack en {person.city}. Construyo aplicaciones a medida para empresas:
+      la interfaz, la lógica de servidor, la base de datos y el despliegue.
+    </>
+  ),
+  /** Tecnologías principales, para el vistazo rápido de quien revisa el perfil. */
+  stack: [
+    { name: "Next.js", icon: "nextjs" },
+    { name: "React", icon: "react" },
+    { name: "TypeScript", icon: "typescript" },
+    { name: "Angular", icon: "angular" },
+    { name: "PHP", icon: "php" },
+    { name: "Java", icon: "java" },
+    { name: "MySQL", icon: "mysql" },
+    { name: "Docker", icon: "docker" },
+  ],
 };
 
 const about: About = {

@@ -2,6 +2,7 @@ import { Meta, Schema } from "@once-ui-system/core";
 import { baseURL, news, person } from "@/resources";
 import { getNews } from "@/lib/news";
 import NoticiasClient from "./NoticiasClient";
+import { assertRouteEnabled } from "@/utils/route-guard";
 
 /**
  * Regenera la página cada 15 minutos. Next exige un literal aquí, así que este
@@ -20,6 +21,8 @@ export async function generateMetadata() {
 }
 
 export default async function Noticias() {
+  assertRouteEnabled("/noticias");
+
   const items = await getNews();
 
   return (

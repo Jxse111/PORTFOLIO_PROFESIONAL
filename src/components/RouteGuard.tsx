@@ -2,64 +2,58 @@
 
 import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
-import { routes, protectedRoutes } from "@/resources";
-import { Flex, Spinner, Button, Heading, Column, PasswordInput } from "@once-ui-system/core";
-import NotFound from "@/app/not-found";
+import { protectedRoutes } from "@/resources";
+import { Button, Heading, Column, PasswordInput } from "@once-ui-system/core";
 
 interface RouteGuardProps {
   children: React.ReactNode;
 }
 
+/**
+ * Puerta de contraseña para las rutas de `protectedRoutes`.
+ *
+ * Antes este componente también comprobaba en el navegador si la ruta estaba
+ * activada, y para hacerlo tapaba TODA la web con un spinner en cada carga,
+ * aunque el servidor ya hubiera enviado el HTML completo. Esa comprobación se
+ * hace ahora en el servidor (ver `assertRouteEnabled`), así que aquí solo queda
+ * la protección por contraseña: las páginas normales se pintan al instante.
+ */
 const RouteGuard: React.FC<RouteGuardProps> = ({ children }) => {
-  const pathname = usePathname();
-  const [isRouteEnabled, setIsRouteEnabled] = useState(false);
-  const [isPasswordRequired, setIsPasswordRequired] = useState(false);
-  const [password, setPassword] = useState("");
+  const pathname = usePathname() ?? "";
+
+  // Se conoce de forma síncrona a partir de la configuración estática: no hace
+  // falta ningún estado de carga para saberlo.
+  const isProtected = Boolean(protectedRoutes[pathname as keyof typeof protectedRoutes]);
+
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [checking, setChecking] = useState(isProtected);
+  const [password, setPassword] = useState("");
   const [error, setError] = useState<string | undefined>(undefined);
-  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const performChecks = async () => {
-      setLoading(true);
-      setIsRouteEnabled(false);
-      setIsPasswordRequired(false);
-      setIsAuthenticated(false);
+    if (!isProtected) {
+      setChecking(false);
+      return;
+    }
 
-      const checkRouteEnabled = () => {
-        if (!pathname) return false;
+    let cancelled = false;
+    setChecking(true);
 
-        if (pathname in routes) {
-          return routes[pathname as keyof typeof routes];
-        }
+    fetch("/api/check-auth")
+      .then((response) => {
+        if (!cancelled) setIsAuthenticated(response.ok);
+      })
+      .catch(() => {
+        if (!cancelled) setIsAuthenticated(false);
+      })
+      .finally(() => {
+        if (!cancelled) setChecking(false);
+      });
 
-        const dynamicRoutes = ["/work"] as const;
-        for (const route of dynamicRoutes) {
-          if (pathname?.startsWith(route) && routes[route]) {
-            return true;
-          }
-        }
-
-        return false;
-      };
-
-      const routeEnabled = checkRouteEnabled();
-      setIsRouteEnabled(routeEnabled);
-
-      if (protectedRoutes[pathname as keyof typeof protectedRoutes]) {
-        setIsPasswordRequired(true);
-
-        const response = await fetch("/api/check-auth");
-        if (response.ok) {
-          setIsAuthenticated(true);
-        }
-      }
-
-      setLoading(false);
+    return () => {
+      cancelled = true;
     };
-
-    performChecks();
-  }, [pathname]);
+  }, [isProtected, pathname]);
 
   const handlePasswordSubmit = async () => {
     const response = await fetch("/api/authenticate", {
@@ -72,43 +66,36 @@ const RouteGuard: React.FC<RouteGuardProps> = ({ children }) => {
       setIsAuthenticated(true);
       setError(undefined);
     } else {
-      setError("Incorrect password");
+      setError("Contraseña incorrecta");
     }
   };
 
-  if (loading) {
-    return (
-      <Flex fillWidth paddingY="128" horizontal="center">
-        <Spinner />
-      </Flex>
-    );
+  if (!isProtected || isAuthenticated) {
+    return <>{children}</>;
   }
 
-  if (!isRouteEnabled) {
-    return <NotFound />;
+  if (checking) {
+    // Solo ocurre en rutas protegidas, nunca en la navegación normal.
+    return null;
   }
 
-  if (isPasswordRequired && !isAuthenticated) {
-    return (
-      <Column paddingY="128" maxWidth={24} gap="24" center>
-        <Heading align="center" wrap="balance">
-          This page is password protected
-        </Heading>
-        <Column fillWidth gap="8" horizontal="center">
-          <PasswordInput
-            id="password"
-            label="Password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            errorMessage={error}
-          />
-          <Button onClick={handlePasswordSubmit}>Submit</Button>
-        </Column>
+  return (
+    <Column paddingY="128" maxWidth={24} gap="24" center>
+      <Heading align="center" wrap="balance">
+        Esta página está protegida con contraseña
+      </Heading>
+      <Column fillWidth gap="8" horizontal="center">
+        <PasswordInput
+          id="password"
+          label="Contraseña"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          errorMessage={error}
+        />
+        <Button onClick={handlePasswordSubmit}>Entrar</Button>
       </Column>
-    );
-  }
-
-  return <>{children}</>;
+    </Column>
+  );
 };
 
 export { RouteGuard };

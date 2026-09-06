@@ -1,6 +1,7 @@
 import { Column, Heading, Meta, Schema } from "@once-ui-system/core";
 import { baseURL, about, person, work } from "@/resources";
 import { Projects } from "@/components/work/Projects";
+import { assertRouteEnabled } from "@/utils/route-guard";
 
 export async function generateMetadata() {
   return Meta.generate({
@@ -13,6 +14,8 @@ export async function generateMetadata() {
 }
 
 export default function Work() {
+  assertRouteEnabled("/work");
+
   return (
     <Column maxWidth="m" paddingTop="24">
       <Schema
