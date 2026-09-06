@@ -42,6 +42,23 @@
   object-fit: cover;
   display: block;
   transition: transform 400ms var(--transition-eased);
+  /* Las portadas remotas aparecían de golpe al terminar de cargar. */
+  animation: thumbIn 300ms ease-out;
+}
+
+@keyframes thumbIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .thumb {
+    animation: none;
+  }
 }
 
 .card:hover .thumb {
@@ -67,6 +84,9 @@
 
 .title {
   color: var(--neutral-on-background-strong);
+  /* Reserva de espacio para tres líneas: evita que las tarjetas de la rejilla
+     queden a alturas distintas según lo largo que sea el titular. */
+  min-height: 3.9em;
   display: -webkit-box;
   -webkit-line-clamp: 3;
   line-clamp: 3;

@@ -17,6 +17,7 @@ import {
 } from "@once-ui-system/core";
 import { Footer, Header, RouteGuard, Providers } from "@/components";
 import FloatingChatButton from "@/components/FloatingChatButton";
+import { PageTransition } from "@/components/PageTransition";
 import { StructuredData } from "@/components/StructuredData";
 import { baseURL, effects, fonts, style, dataStyle, home } from "@/resources";
 
@@ -178,7 +179,9 @@ export default async function RootLayout({
           <Header />
           <Flex zIndex={0} fillWidth padding="l" horizontal="center" flex={1}>
             <Flex horizontal="center" fillWidth minHeight="0">
-              <RouteGuard>{children}</RouteGuard>
+              <RouteGuard>
+                <PageTransition>{children}</PageTransition>
+              </RouteGuard>
             </Flex>
           </Flex>
           <Footer />

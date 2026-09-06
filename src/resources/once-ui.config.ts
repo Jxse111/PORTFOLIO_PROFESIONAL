@@ -42,8 +42,10 @@ const routes: RoutesConfig = {
 };
 
 const display: DisplayConfig = {
-  location: true,
-  time: true,
+  // La ubicación y el reloj ocupaban los dos extremos de la cabecera sin
+  // aportar información útil en un portfolio. El código sigue disponible.
+  location: false,
+  time: false,
   themeSwitcher: true,
 };
 

@@ -5,6 +5,7 @@ import { Column, Row, Heading, Text, Button, Icon } from "@once-ui-system/core";
 import { NewsCard } from "@/components/news/NewsCard";
 import { NEWS_CATEGORIES, type NewsCategory } from "@/lib/news/sources";
 import type { NewsItem } from "@/lib/news/types";
+import { pickBreakingIds } from "@/lib/news/format";
 import styles from "./NoticiasClient.module.scss";
 
 const PAGE_SIZE = 12;
@@ -50,6 +51,7 @@ export default function NoticiasClient({ items }: NoticiasClientProps) {
   }, [items, filter, query]);
 
   const shown = filtered.slice(0, visible);
+  const breakingIds = useMemo(() => pickBreakingIds(filtered), [filtered]);
 
   const changeFilter = (next: Filter) => {
     setFilter(next);
@@ -126,7 +128,12 @@ export default function NoticiasClient({ items }: NoticiasClientProps) {
       ) : (
         <div className={styles.grid}>
           {shown.map((item) => (
-            <NewsCard key={item.id} item={item} compactOnMobile />
+            <NewsCard
+              key={item.id}
+              item={item}
+              compactOnMobile
+              allowBreaking={breakingIds.has(item.id)}
+            />
           ))}
         </div>
       )}

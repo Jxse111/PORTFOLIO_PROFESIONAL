@@ -9,6 +9,7 @@ import {
   SmartLink,
   Text,
 } from "@once-ui-system/core";
+import styles from "./ProjectCard.module.scss";
 
 interface ProjectCardProps {
   href: string;
@@ -19,6 +20,8 @@ interface ProjectCardProps {
   description: string;
   avatars: { src: string }[];
   link: string;
+  /** Tecnologías del proyecto, tal y como se declaran en el .mdx */
+  technologies?: string[];
 }
 
 export const ProjectCard: React.FC<ProjectCardProps> = ({
@@ -29,6 +32,7 @@ export const ProjectCard: React.FC<ProjectCardProps> = ({
   description,
   avatars,
   link,
+  technologies = [],
 }) => {
   return (
     <Column fillWidth gap="m">
@@ -54,9 +58,21 @@ export const ProjectCard: React.FC<ProjectCardProps> = ({
             </Heading>
           </Flex>
         )}
-        {(avatars?.length > 0 || description?.trim() || content?.trim()) && (
+        {(avatars?.length > 0 ||
+          description?.trim() ||
+          content?.trim() ||
+          technologies.length > 0) && (
           <Column flex={7} gap="16">
             {avatars?.length > 0 && <AvatarGroup avatars={avatars} size="m" reverse />}
+            {technologies.length > 0 && (
+              <ul className={styles.techList} aria-label={`Tecnologías de ${title}`}>
+                {technologies.map((tech) => (
+                  <li key={tech} className={styles.techItem}>
+                    {tech}
+                  </li>
+                ))}
+              </ul>
+            )}
             {description?.trim() && (
               <Text wrap="balance" variant="body-default-s" onBackground="neutral-weak">
                 {description}

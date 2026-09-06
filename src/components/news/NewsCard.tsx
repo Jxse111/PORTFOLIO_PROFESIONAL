@@ -14,14 +14,25 @@ interface NewsCardProps {
    * la rejilla de /noticias; el carrusel mantiene la tarjeta vertical.
    */
   compactOnMobile?: boolean;
+  /**
+   * Permite mostrar el distintivo de "Última hora". Lo decide la lista, que
+   * solo lo concede a las más recientes: cuando varios medios publican a la
+   * vez, marcarlas todas hace que el distintivo deje de significar nada.
+   */
+  allowBreaking?: boolean;
 }
 
 function faviconUrl(domain: string) {
   return `https://www.google.com/s2/favicons?domain=${domain}&sz=64`;
 }
 
-export function NewsCard({ item, showSummary = true, compactOnMobile = false }: NewsCardProps) {
-  const breaking = isBreaking(item.publishedAt);
+export function NewsCard({
+  item,
+  showSummary = true,
+  compactOnMobile = false,
+  allowBreaking = true,
+}: NewsCardProps) {
+  const breaking = allowBreaking && isBreaking(item.publishedAt);
 
   return (
     <a

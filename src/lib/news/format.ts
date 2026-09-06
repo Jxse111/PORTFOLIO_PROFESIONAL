@@ -25,3 +25,19 @@ export function isBreaking(iso: string): boolean {
   if (Number.isNaN(date.getTime())) return false;
   return Date.now() - date.getTime() < 2 * 60 * 60 * 1000;
 }
+
+/** Máximo de noticias que pueden lucir el distintivo de "última hora". */
+export const MAX_BREAKING = 3;
+
+/**
+ * Ids de las noticias que pueden mostrar el distintivo: las más recientes que
+ * cumplan el criterio, sobre una lista ya ordenada de nueva a antigua.
+ */
+export function pickBreakingIds(items: { id: string; publishedAt: string }[]): Set<string> {
+  const ids = new Set<string>();
+  for (const item of items) {
+    if (ids.size >= MAX_BREAKING) break;
+    if (isBreaking(item.publishedAt)) ids.add(item.id);
+  }
+  return ids;
+}
