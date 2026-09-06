@@ -66,19 +66,20 @@ export const ProjectCard: React.FC<ProjectCardProps> = ({
               {content?.trim() && (
                 <SmartLink
                   suffixIcon="arrowRight"
-                  style={{ margin: "0", width: "fit-content" }}
+                  // Área pulsable cómoda en móvil: el enlace medía 17px de alto.
+                  style={{ margin: "0", width: "fit-content", minHeight: "44px" }}
                   href={href}
                 >
-                  <Text variant="body-default-s">Read case study</Text>
+                  <Text variant="body-default-s">Ver el proyecto en detalle</Text>
                 </SmartLink>
               )}
               {link && (
                 <SmartLink
                   suffixIcon="arrowUpRightFromSquare"
-                  style={{ margin: "0", width: "fit-content" }}
+                  style={{ margin: "0", width: "fit-content", minHeight: "44px" }}
                   href={link}
                 >
-                  <Text variant="body-default-s">View project</Text>
+                  <Text variant="body-default-s">Visitar la web</Text>
                 </SmartLink>
               )}
             </Flex>

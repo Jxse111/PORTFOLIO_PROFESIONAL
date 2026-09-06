@@ -19,3 +19,21 @@
         bottom: 0;
     }
 }
+/**
+ * Objetivos táctiles de la navegación.
+ *
+ * Los botones de Once UI miden 32x30 px en móvil, por debajo del mínimo
+ * recomendado (44 px en iOS, 48 en Android). Al ser la navegación principal,
+ * fallar pulsaciones ahí penaliza toda la experiencia, así que ampliamos el
+ * área pulsable sin cambiar el tamaño visual del icono.
+ */
+@media (max-width: breakpoints.$s) {
+    .nav :is(a, button) {
+        min-width: 44px;
+        min-height: 44px;
+    }
+
+    .nav {
+        gap: var(--static-space-4);
+    }
+}

@@ -1,10 +1,30 @@
 @use "./breakpoints.scss" as *;
 
-.button {
+.container {
   position: fixed;
   bottom: 20px;
   right: 20px;
   z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: var(--static-space-12);
+  transition: opacity 160ms ease, transform 200ms cubic-bezier(0.16, 1, 0.3, 1);
+
+  @include s {
+    // La navegación móvil es una barra fija abajo: dejamos hueco para no taparla.
+    bottom: calc(88px + env(safe-area-inset-bottom));
+    right: 16px;
+  }
+}
+
+.container.hidden {
+  opacity: 0;
+  pointer-events: none;
+  transform: scale(0.8);
+}
+
+.button {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -18,12 +38,12 @@
   cursor: pointer;
   transition:
     transform 200ms cubic-bezier(0.16, 1, 0.3, 1),
-    box-shadow 200ms ease,
-    opacity 160ms ease;
+    box-shadow 200ms ease;
 
   svg {
     width: 24px;
     height: 24px;
+    transition: transform 200ms cubic-bezier(0.16, 1, 0.3, 1);
   }
 
   &:hover {
@@ -36,32 +56,100 @@
     outline-offset: 3px;
   }
 
-  &.hidden {
-    opacity: 0;
-    pointer-events: none;
-    transform: scale(0.8);
-  }
+  // El botón se mantiene a 56px también en móvil: es el acceso de contacto
+  // principal y conviene que sea fácil de acertar con el pulgar.
+}
 
-  @include s {
-    // En móvil la navegación es una barra fija abajo: dejamos hueco para no taparla.
-    bottom: calc(88px + env(safe-area-inset-bottom));
-    right: 16px;
-    width: 48px;
-    height: 48px;
+.iconRotated {
+  transform: rotate(90deg);
+}
 
-    svg {
-      width: 20px;
-      height: 20px;
-    }
+.menu {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: var(--static-space-8);
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(8px) scale(0.96);
+  transform-origin: bottom right;
+  transition:
+    opacity 160ms ease,
+    transform 200ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.menuOpen {
+  opacity: 1;
+  pointer-events: auto;
+  transform: translateY(0) scale(1);
+}
+
+.option {
+  display: flex;
+  align-items: center;
+  gap: var(--static-space-12);
+  padding: 0;
+  background: none;
+  border: none;
+  cursor: pointer;
+  text-decoration: none;
+  color: var(--neutral-on-background-strong);
+}
+
+.optionLabel {
+  padding: var(--static-space-8) var(--static-space-12);
+  background: var(--page-background);
+  border: 1px solid var(--neutral-alpha-medium);
+  border-radius: var(--radius-m);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.16);
+  font-family: var(--font-family-body);
+  font-size: var(--font-size-label-s);
+  white-space: nowrap;
+}
+
+.optionIcon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  /* 48px: mínimo cómodo para el pulgar */
+  width: 48px;
+  height: 48px;
+  background: var(--page-background);
+  border: 1px solid var(--neutral-alpha-medium);
+  border-radius: var(--radius-full);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.16);
+  transition: transform 200ms cubic-bezier(0.16, 1, 0.3, 1);
+
+  svg {
+    width: 20px;
+    height: 20px;
   }
 }
 
-@media (prefers-reduced-motion: reduce) {
-  .button {
-    transition: opacity 160ms ease;
+.option:hover .optionIcon {
+  transform: scale(1.08);
+}
 
-    &:hover {
-      transform: none;
-    }
+.option:focus-visible .optionIcon {
+  outline: 2px solid var(--brand-background-strong);
+  outline-offset: 3px;
+}
+
+.whatsapp {
+  color: #25d366;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .container,
+  .button,
+  .menu,
+  .optionIcon,
+  .button svg {
+    transition: opacity 160ms ease;
+  }
+
+  .button:hover,
+  .option:hover .optionIcon {
+    transform: none;
   }
 }

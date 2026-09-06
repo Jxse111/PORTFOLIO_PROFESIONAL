@@ -9,13 +9,18 @@ interface NewsCardProps {
   item: NewsItem;
   /** Oculta el resumen (útil en el carrusel, donde manda el titular). */
   showSummary?: boolean;
+  /**
+   * Activa la disposición compacta en móvil (imagen a la izquierda). Se usa en
+   * la rejilla de /noticias; el carrusel mantiene la tarjeta vertical.
+   */
+  compactOnMobile?: boolean;
 }
 
 function faviconUrl(domain: string) {
   return `https://www.google.com/s2/favicons?domain=${domain}&sz=64`;
 }
 
-export function NewsCard({ item, showSummary = true }: NewsCardProps) {
+export function NewsCard({ item, showSummary = true, compactOnMobile = false }: NewsCardProps) {
   const breaking = isBreaking(item.publishedAt);
 
   return (
@@ -23,7 +28,7 @@ export function NewsCard({ item, showSummary = true }: NewsCardProps) {
       href={item.url}
       target="_blank"
       rel="noopener noreferrer nofollow"
-      className={styles.card}
+      className={`${styles.card} ${compactOnMobile ? styles.compactOnMobile : ""}`}
     >
       <div className={styles.thumbWrapper}>
         {item.image ? (
@@ -52,7 +57,7 @@ export function NewsCard({ item, showSummary = true }: NewsCardProps) {
         padding="16"
         vertical="start"
       >
-        <Row gap="8" vertical="center" wrap>
+        <Row gap="8" vertical="center" wrap className={styles.meta}>
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             className={styles.favicon}

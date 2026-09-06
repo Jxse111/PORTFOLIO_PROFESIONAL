@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Column, Row, Heading, Text, Button, Icon } from "@once-ui-system/core";
 import { NewsCard } from "@/components/news/NewsCard";
 import { NEWS_CATEGORIES, type NewsCategory } from "@/lib/news/sources";
@@ -19,6 +19,22 @@ export default function NoticiasClient({ items }: NoticiasClientProps) {
   const [filter, setFilter] = useState<Filter>("todas");
   const [query, setQuery] = useState("");
   const [visible, setVisible] = useState(PAGE_SIZE);
+  const tabsRef = useRef<HTMLDivElement>(null);
+  const [tabsAtEnd, setTabsAtEnd] = useState(false);
+
+  // Oculta el degradado del borde cuando ya no queda nada por desplazar.
+  const updateTabsFade = useCallback(() => {
+    const tabs = tabsRef.current;
+    if (!tabs) return;
+    const maxScroll = tabs.scrollWidth - tabs.clientWidth;
+    setTabsAtEnd(maxScroll <= 4 || tabs.scrollLeft >= maxScroll - 4);
+  }, []);
+
+  useEffect(() => {
+    updateTabsFade();
+    window.addEventListener("resize", updateTabsFade);
+    return () => window.removeEventListener("resize", updateTabsFade);
+  }, [updateTabsFade]);
 
   const filtered = useMemo(() => {
     const needle = query.trim().toLowerCase();
@@ -73,28 +89,30 @@ export default function NoticiasClient({ items }: NoticiasClientProps) {
           }}
         />
 
-        <div className={styles.tabScroller}>
-          <button
-            type="button"
-            className={`${styles.tab} ${filter === "todas" ? styles.tabActive : ""}`}
-            onClick={() => changeFilter("todas")}
-            aria-pressed={filter === "todas"}
-          >
-            <Icon name="fire" size="xs" />
-            Todas ({counts.get("todas") ?? 0})
-          </button>
-          {NEWS_CATEGORIES.map((category) => (
+        <div className={`${styles.tabWrapper} ${tabsAtEnd ? styles.atEnd : ""}`}>
+          <div className={styles.tabScroller} ref={tabsRef} onScroll={updateTabsFade}>
             <button
-              key={category.id}
               type="button"
-              className={`${styles.tab} ${filter === category.id ? styles.tabActive : ""}`}
-              onClick={() => changeFilter(category.id)}
-              aria-pressed={filter === category.id}
+              className={`${styles.tab} ${filter === "todas" ? styles.tabActive : ""}`}
+              onClick={() => changeFilter("todas")}
+              aria-pressed={filter === "todas"}
             >
-              <Icon name={category.icon} size="xs" />
-              {category.label} ({counts.get(category.id) ?? 0})
+              <Icon name="fire" size="xs" />
+              Todas ({counts.get("todas") ?? 0})
             </button>
-          ))}
+            {NEWS_CATEGORIES.map((category) => (
+              <button
+                key={category.id}
+                type="button"
+                className={`${styles.tab} ${filter === category.id ? styles.tabActive : ""}`}
+                onClick={() => changeFilter(category.id)}
+                aria-pressed={filter === category.id}
+              >
+                <Icon name={category.icon} size="xs" />
+                {category.label} ({counts.get(category.id) ?? 0})
+              </button>
+            ))}
+          </div>
         </div>
       </Column>
 
@@ -108,7 +126,7 @@ export default function NoticiasClient({ items }: NoticiasClientProps) {
       ) : (
         <div className={styles.grid}>
           {shown.map((item) => (
-            <NewsCard key={item.id} item={item} />
+            <NewsCard key={item.id} item={item} compactOnMobile />
           ))}
         </div>
       )}

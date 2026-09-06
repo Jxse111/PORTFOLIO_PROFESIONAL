@@ -23,6 +23,12 @@ const newsletter: Newsletter = {
   ),
 };
 
+/** Contacto directo por WhatsApp, usado por el botón flotante de contacto. */
+const whatsapp = {
+  number: "34644497129",
+  url: "https://wa.me/34644497129",
+};
+
 const social: Social = [
   {
     name: "GitHub",
@@ -312,4 +318,4 @@ const gallery: Gallery = {
   ],
 };
 
-export { person, social, newsletter, home, about, news, work, gallery };
+export { person, social, whatsapp, newsletter, home, about, news, work, gallery };
