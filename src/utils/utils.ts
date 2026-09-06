@@ -22,11 +22,24 @@ type Metadata = {
   technologies?: string[];
 };
 
-import { notFound } from "next/navigation";
-
+/**
+ * Leer contenido que falta NO puede tumbar la página.
+ *
+ * Antes, si el directorio de proyectos no estaba disponible, esto llamaba a
+ * `notFound()` y convertía en 404 cualquier página que listara proyectos.
+ * Eso fue exactamente lo que rompió la portada: al ser ISR se regeneraba en
+ * una función serverless donde los .mdx no estaban incluidos, y cada
+ * regeneración la dejaba en 404 aunque el HTML del build fuese correcto.
+ *
+ * Ahora la ausencia de contenido devuelve una lista vacía: como mucho se deja
+ * de ver una sección, pero la página sigue en pie. El fallo real (que los .mdx
+ * lleguen a la función) se corrige con `outputFileTracingIncludes` en
+ * next.config.mjs; esto es la red de seguridad.
+ */
 function getMDXFiles(dir: string) {
   if (!fs.existsSync(dir)) {
-    notFound();
+    console.warn(`[content] directorio no encontrado: ${dir}`);
+    return [];
   }
 
   return fs.readdirSync(dir).filter((file) => path.extname(file) === ".mdx");
@@ -34,7 +47,8 @@ function getMDXFiles(dir: string) {
 
 function readMDXFile(filePath: string) {
   if (!fs.existsSync(filePath)) {
-    notFound();
+    console.warn(`[content] archivo no encontrado: ${filePath}`);
+    return null;
   }
 
   const rawContent = fs.readFileSync(filePath, "utf-8");
@@ -57,15 +71,17 @@ function readMDXFile(filePath: string) {
 
 function getMDXData(dir: string) {
   const mdxFiles = getMDXFiles(dir);
-  return mdxFiles.map((file) => {
-    const { metadata, content } = readMDXFile(path.join(dir, file));
-    const slug = path.basename(file, path.extname(file));
+  return mdxFiles.flatMap((file) => {
+    const parsed = readMDXFile(path.join(dir, file));
+    if (!parsed) return [];
 
-    return {
-      metadata,
-      slug,
-      content,
-    };
+    return [
+      {
+        metadata: parsed.metadata,
+        slug: path.basename(file, path.extname(file)),
+        content: parsed.content,
+      },
+    ];
   });
 }
 
