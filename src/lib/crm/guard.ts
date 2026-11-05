@@ -30,7 +30,11 @@ export function isAdminRequest(request: Request): boolean {
   return hasCrmSessionFromRequest(request) || hasEmailSessionFromRequest(request);
 }
 
-/** El primer acceso solo puede crearse tras verificar el correo autorizado. */
+/**
+ * El primer acceso solo puede crearse tras verificar el correo autorizado.
+ * En desarrollo se permite sin correo para poder probar el panel en local;
+ * en producción nunca.
+ */
 export function canBootstrapFromRequest(request: Request): boolean {
-  return hasEmailSessionFromRequest(request);
+  return process.env.NODE_ENV !== "production" || hasEmailSessionFromRequest(request);
 }

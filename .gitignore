@@ -36,3 +36,5 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+# acceso local del CRM (nunca se publica)
+.data

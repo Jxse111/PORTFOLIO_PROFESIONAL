@@ -8,9 +8,14 @@ import { useState } from "react";
 
 type Step = "email" | "code" | "password" | "confirm";
 
-export default function CrmSetup() {
+interface Props {
+  /** En local no se envía correo: se salta directo a la contraseña. */
+  devBootstrap?: boolean;
+}
+
+export default function CrmSetup({ devBootstrap = false }: Props) {
   const router = useRouter();
-  const [step, setStep] = useState<Step>("email");
+  const [step, setStep] = useState<Step>(devBootstrap ? "password" : "email");
   const [email, setEmail] = useState("");
   const [emailCode, setEmailCode] = useState("");
   const [password, setPassword] = useState("");

@@ -7,5 +7,5 @@ export const dynamic = "force-dynamic";
 
 export default async function CrmSetupPage() {
   if (await readCredentials()) redirect("/crm/login");
-  return <CrmSetup />;
+  return <CrmSetup devBootstrap={process.env.NODE_ENV !== "production"} />;
 }
