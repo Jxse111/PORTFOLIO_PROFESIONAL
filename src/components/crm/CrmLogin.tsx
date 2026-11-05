@@ -61,6 +61,7 @@ export default function CrmLogin({ devMode = false }: Props) {
           className={styles.input}
           type="password"
           autoComplete="current-password"
+          autoFocus
           value={password}
           onChange={(event) => setPassword(event.target.value)}
           required

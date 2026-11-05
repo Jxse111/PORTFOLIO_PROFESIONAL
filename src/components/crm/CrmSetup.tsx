@@ -68,6 +68,14 @@ export default function CrmSetup({ devBootstrap = false }: Props) {
 
   const choosePassword = async (event: React.FormEvent) => {
     event.preventDefault();
+    if (password.length < 8) {
+      setError("La contraseña necesita al menos 8 caracteres.");
+      return;
+    }
+    if (!/[a-zA-Z]/.test(password) || !/\d/.test(password)) {
+      setError("La contraseña debe mezclar letras y números.");
+      return;
+    }
     if (password !== repeat) {
       setError("Las dos contraseñas no coinciden");
       return;
@@ -92,6 +100,10 @@ export default function CrmSetup({ devBootstrap = false }: Props) {
 
   const finish = async (event: React.FormEvent) => {
     event.preventDefault();
+    if (appCode.length > 0 && appCode.length !== 6) {
+      setError("El código de la app tiene 6 dígitos (o déjalo vacío en local).");
+      return;
+    }
     setBusy(true);
     setError(null);
     try {
@@ -171,7 +183,7 @@ export default function CrmSetup({ devBootstrap = false }: Props) {
       {step === "password" ? (
         <form className={styles.cardPlain} onSubmit={choosePassword}>
           <Text variant="body-default-s" onBackground="neutral-weak">
-            Elige una contraseña larga (mínimo 12 caracteres, con letras y números). Solo se guarda
+            Elige una contraseña (mínimo 8 caracteres, con letras y números). Solo se guarda
             cifrada.
           </Text>
           <div className={styles.field}>
@@ -182,11 +194,13 @@ export default function CrmSetup({ devBootstrap = false }: Props) {
               id="crm-new-password"
               className={styles.input}
               type="password"
+              autoFocus
               autoComplete="new-password"
               value={password}
               onChange={(event) => setPassword(event.target.value)}
               required
             />
+            <span className={styles.hint}>Mínimo 8 caracteres, mezclando letras y números.</span>
           </div>
           <div className={styles.field}>
             <label className={styles.label} htmlFor="crm-repeat-password">
@@ -203,7 +217,7 @@ export default function CrmSetup({ devBootstrap = false }: Props) {
             />
           </div>
           <div className={styles.actions}>
-            <ActionButton type="submit" loading={busy} disabled={password.length < 12}>
+            <ActionButton type="submit" loading={busy}>
               Continuar
             </ActionButton>
           </div>
@@ -235,15 +249,15 @@ export default function CrmSetup({ devBootstrap = false }: Props) {
               maxLength={6}
               value={appCode}
               onChange={(event) => setAppCode(event.target.value.replace(/\D/g, ""))}
-              required
             />
+            <span className={styles.hint}>
+              {devBootstrap
+                ? "En local puedes dejarlo vacío y guardar igualmente."
+                : "6 dígitos de tu app de autenticación."}
+            </span>
           </div>
           <div className={styles.actions}>
-            <ActionButton
-              type="submit"
-              loading={busy}
-              disabled={appCode.length > 0 && appCode.length !== 6}
-            >
+            <ActionButton type="submit" loading={busy}>
               Guardar acceso
             </ActionButton>
           </div>

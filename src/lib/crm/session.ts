@@ -15,7 +15,7 @@ export function verifyPassword(password: string, salt: string, hash: string): bo
 
 /** La contraseña del CRM tiene que ser larga: no hay bloqueo de cuenta. */
 export function passwordProblem(password: string): string | null {
-  if (password.length < 12) return "Usa al menos 12 caracteres.";
+  if (password.length < 8) return "Usa al menos 8 caracteres.";
   if (!/[a-zA-Z]/.test(password) || !/\d/.test(password)) {
     return "Mezcla letras y números.";
   }

@@ -8,10 +8,6 @@
   gap: var(--static-space-24);
 }
 
-.narrow {
-  max-width: 440px;
-}
-
 .header {
   display: flex;
   align-items: flex-end;
@@ -24,10 +20,22 @@
   display: flex;
   flex-direction: column;
   gap: var(--static-space-16);
-  padding: var(--static-space-24);
+  padding: var(--static-space-32);
   border-radius: var(--radius-l);
   border: 1px solid var(--neutral-alpha-medium);
   background: var(--neutral-alpha-weak);
+  box-shadow: 0 12px 48px rgba(0, 0, 0, 0.12);
+}
+
+.narrow {
+  width: 100%;
+  max-width: 480px;
+  margin-inline: auto;
+}
+
+.hint {
+  font-size: var(--font-size-label-s);
+  color: var(--neutral-on-background-weak);
 }
 
 .field {
