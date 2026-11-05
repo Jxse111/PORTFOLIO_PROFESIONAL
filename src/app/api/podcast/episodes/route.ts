@@ -1,4 +1,4 @@
-import { SESSION_COOKIE, verifySessionToken } from "@/lib/gallery/auth";
+import { isAdminRequest } from "@/lib/crm/guard";
 import { AUDIO_PREFIX, addEpisode, readEpisodes, removeEpisode } from "@/lib/podcast/episodes";
 import type { PodcastEpisode } from "@/lib/podcast/types";
 import { type NextRequest, NextResponse } from "next/server";
@@ -6,17 +6,13 @@ import { type NextRequest, NextResponse } from "next/server";
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
-function authorized(request: NextRequest): boolean {
-  return verifySessionToken(request.cookies.get(SESSION_COOKIE)?.value);
-}
-
 export async function GET() {
   const episodes = await readEpisodes();
   return NextResponse.json({ episodes });
 }
 
 export async function POST(request: NextRequest) {
-  if (!authorized(request)) {
+  if (!isAdminRequest(request)) {
     return NextResponse.json({ message: "No autorizado" }, { status: 401 });
   }
 
@@ -76,7 +72,7 @@ export async function POST(request: NextRequest) {
 }
 
 export async function DELETE(request: NextRequest) {
-  if (!authorized(request)) {
+  if (!isAdminRequest(request)) {
     return NextResponse.json({ message: "No autorizado" }, { status: 401 });
   }
 

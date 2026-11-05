@@ -1,4 +1,4 @@
-import { SESSION_COOKIE, verifySessionToken } from "@/lib/gallery/auth";
+import { isAdminRequest } from "@/lib/crm/guard";
 import { ALLOWED_AUDIO_TYPES, AUDIO_PREFIX, MAX_AUDIO_BYTES } from "@/lib/podcast/config";
 import { blobConfigured } from "@/lib/podcast/episodes";
 import { type HandleUploadBody, handleUpload } from "@vercel/blob/client";
@@ -12,7 +12,7 @@ export const runtime = "nodejs";
  * Aquí solo se firma el permiso de subida, previa verificación de la sesión.
  */
 export async function POST(request: NextRequest) {
-  if (!verifySessionToken(request.cookies.get(SESSION_COOKIE)?.value)) {
+  if (!isAdminRequest(request)) {
     return NextResponse.json({ message: "No autorizado" }, { status: 401 });
   }
 

@@ -1,13 +1,14 @@
-import { NextRequest, NextResponse } from "next/server";
-import { put } from "@vercel/blob";
-import { SESSION_COOKIE, verifySessionToken } from "@/lib/gallery/auth";
+import { isAdminRequest } from "@/lib/crm/guard";
 import {
   BLOB_PREFIX,
   INDEX_PATH,
+  type UploadedImage,
   blobConfigured,
   readUploadedImages,
-  type UploadedImage,
+  removeUploadedImage,
 } from "@/lib/gallery/images";
+import { put } from "@vercel/blob";
+import { type NextRequest, NextResponse } from "next/server";
 
 export const runtime = "nodejs";
 
@@ -19,14 +20,14 @@ function safeName(name: string): string {
   const base = name.split(/[\\/]/).pop() ?? "imagen";
   return base
     .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/\p{Diacritic}/gu, "")
     .replace(/[^a-zA-Z0-9._-]/g, "-")
     .replace(/-+/g, "-")
     .slice(-80);
 }
 
 export async function POST(request: NextRequest) {
-  if (!verifySessionToken(request.cookies.get(SESSION_COOKIE)?.value)) {
+  if (!isAdminRequest(request)) {
     return NextResponse.json({ message: "No autorizado" }, { status: 401 });
   }
 
@@ -100,4 +101,32 @@ export async function POST(request: NextRequest) {
     console.error("[gallery] fallo al subir la imagen", error);
     return NextResponse.json({ message: "No se pudo guardar la imagen" }, { status: 500 });
   }
+}
+
+export async function DELETE(request: NextRequest) {
+  if (!isAdminRequest(request)) {
+    return NextResponse.json({ message: "No autorizado" }, { status: 401 });
+  }
+
+  let body: { src?: string };
+  try {
+    body = (await request.json()) as typeof body;
+  } catch {
+    return NextResponse.json({ message: "Petición inválida" }, { status: 400 });
+  }
+
+  const src = String(body.src ?? "").trim();
+  if (!src) return NextResponse.json({ message: "Falta la imagen" }, { status: 400 });
+
+  try {
+    const removed = await removeUploadedImage(src);
+    if (!removed) {
+      return NextResponse.json({ message: "Esa imagen no existe" }, { status: 404 });
+    }
+  } catch (error) {
+    console.error("[gallery] no se pudo borrar la imagen", error);
+    return NextResponse.json({ message: "No se pudo borrar la imagen" }, { status: 500 });
+  }
+
+  return NextResponse.json({ ok: true });
 }

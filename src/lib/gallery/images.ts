@@ -1,5 +1,5 @@
-import { list } from "@vercel/blob";
 import { gallery } from "@/resources";
+import { del, list, put } from "@vercel/blob";
 
 export interface GalleryImage {
   src: string;
@@ -69,4 +69,34 @@ export async function getGalleryImages(): Promise<GalleryImage[]> {
     }));
 
   return [...uploadedImages, ...gallery.images];
+}
+
+/** Borra una imagen subida: primero del índice y después del almacenamiento. */
+export async function removeUploadedImage(src: string): Promise<boolean> {
+  const index = await readUploadedImages();
+  if (!index.some((image) => image.src === src)) return false;
+
+  await put(
+    INDEX_PATH,
+    JSON.stringify(
+      index.filter((image) => image.src !== src),
+      null,
+      2,
+    ),
+    {
+      access: "public",
+      contentType: "application/json",
+      addRandomSuffix: false,
+      allowOverwrite: true,
+      cacheControlMaxAge: 0,
+    },
+  );
+
+  try {
+    await del(src);
+  } catch (error) {
+    console.warn("[gallery] no se pudo borrar el archivo", error);
+  }
+
+  return true;
 }

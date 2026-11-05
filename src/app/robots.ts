@@ -27,12 +27,12 @@ export default function robots() {
         userAgent: "*",
         allow: "/",
         // Las rutas de API no aportan nada a un buscador y consumen rastreo.
-        disallow: ["/api/"],
+        disallow: ["/api/", "/crm"],
       },
       ...AI_CRAWLERS.map((userAgent) => ({
         userAgent,
         allow: "/",
-        disallow: ["/api/"],
+        disallow: ["/api/", "/crm"],
       })),
     ],
     sitemap: `${baseURL}/sitemap.xml`,
