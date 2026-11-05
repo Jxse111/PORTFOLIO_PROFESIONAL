@@ -9,9 +9,11 @@ export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
 export default async function CrmPage() {
-  const credentials = await readCredentials();
-  if (!credentials) redirect("/crm/setup");
-  if (!(await hasCrmSession())) redirect("/crm/login");
+  if (process.env.NODE_ENV === "production") {
+    const credentials = await readCredentials();
+    if (!credentials) redirect("/crm/setup");
+    if (!(await hasCrmSession())) redirect("/crm/login");
+  }
 
   const [episodes, images] = await Promise.all([
     readEpisodes().catch(() => []),
