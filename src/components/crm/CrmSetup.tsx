@@ -26,6 +26,7 @@ export default function CrmSetup({ devBootstrap = false }: Props) {
   const [appCode, setAppCode] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [copied, setCopied] = useState(false);
 
   const call = async (url: string, body: unknown) => {
     const response = await fetch(url, {
@@ -232,9 +233,25 @@ export default function CrmSetup({ devBootstrap = false }: Props) {
           <div className={styles.field}>
             <span className={styles.label}>Secreto (para introducirlo a mano)</span>
             <code className={styles.secret}>{secret.formatted}</code>
+            <button
+              type="button"
+              className={styles.copy}
+              onClick={async () => {
+                try {
+                  await navigator.clipboard.writeText(secret.raw);
+                  setCopied(true);
+                  window.setTimeout(() => setCopied(false), 2500);
+                } catch {
+                  setError("Copia el secreto a mano, tu navegador no ha dejado copiarlo.");
+                }
+              }}
+            >
+              {copied ? "Copiado" : "Copiar secreto"}
+            </button>
           </div>
           <Text variant="body-default-s" onBackground="neutral-weak">
-            Cuenta: Apple Slices · Tipo: basado en tiempo · 6 dígitos cada 30 s.
+            Cuenta: Apple Slices · Tipo: basado en tiempo · 6 dígitos cada 30 s. En el iPhone:
+            Contraseñas → + → Otra contraseña con código, y pega el secreto.
             {devBootstrap ? " En local puedes guardar sin código." : ""}
           </Text>
           <div className={styles.field}>

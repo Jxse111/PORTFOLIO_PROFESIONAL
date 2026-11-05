@@ -193,6 +193,18 @@
   background: var(--success-alpha-weak);
 }
 
+.copy {
+  align-self: flex-start;
+  padding: 6px 12px;
+  border: 1px solid var(--neutral-alpha-medium);
+  border-radius: 8px;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  font-size: 13px;
+  cursor: pointer;
+}
+
 .secret {
   font-family: var(--font-family-code);
   font-size: var(--font-size-body-s);
