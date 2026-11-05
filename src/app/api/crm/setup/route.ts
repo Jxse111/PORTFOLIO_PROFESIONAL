@@ -64,7 +64,11 @@ export async function POST(request: Request) {
     return NextResponse.json({ message: "Falta el secreto de la app" }, { status: 400 });
   }
 
-  if (!verifyTotp(secret, code)) {
+  const devMode = process.env.NODE_ENV !== "production";
+
+  // En local se puede guardar sin app para poder ver el panel; en producción
+  // el código de 6 dígitos es obligatorio.
+  if ((!devMode || code) && !verifyTotp(secret, code)) {
     return NextResponse.json(
       { message: "El código de 6 dígitos no es válido. Comprueba la hora del móvil." },
       { status: 400 },

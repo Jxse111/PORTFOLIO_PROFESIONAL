@@ -13,7 +13,7 @@ export default async function CrmLoginPage() {
 
   return (
     <div style={{ maxWidth: 440, margin: "0 auto", width: "100%" }}>
-      <CrmLogin />
+      <CrmLogin devMode={process.env.NODE_ENV !== "production"} />
     </div>
   );
 }

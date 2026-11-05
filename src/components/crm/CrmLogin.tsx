@@ -6,7 +6,12 @@ import { Heading, Text } from "@once-ui-system/core";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
-export default function CrmLogin() {
+interface Props {
+  /** En local se puede entrar solo con la contraseña. */
+  devMode?: boolean;
+}
+
+export default function CrmLogin({ devMode = false }: Props) {
   const router = useRouter();
   const [password, setPassword] = useState("");
   const [code, setCode] = useState("");
@@ -81,7 +86,7 @@ export default function CrmLogin() {
       {error ? <p className={`${styles.message} ${styles.error}`}>{error}</p> : null}
 
       <div className={styles.actions}>
-        <ActionButton type="submit" loading={busy} disabled={code.length !== 6}>
+        <ActionButton type="submit" loading={busy} disabled={code.length > 0 && code.length !== 6}>
           Entrar
         </ActionButton>
       </div>

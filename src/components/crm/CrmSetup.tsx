@@ -221,6 +221,7 @@ export default function CrmSetup({ devBootstrap = false }: Props) {
           </div>
           <Text variant="body-default-s" onBackground="neutral-weak">
             Cuenta: Apple Slices · Tipo: basado en tiempo · 6 dígitos cada 30 s.
+            {devBootstrap ? " En local puedes guardar sin código." : ""}
           </Text>
           <div className={styles.field}>
             <label className={styles.label} htmlFor="crm-app-code">
@@ -238,7 +239,11 @@ export default function CrmSetup({ devBootstrap = false }: Props) {
             />
           </div>
           <div className={styles.actions}>
-            <ActionButton type="submit" loading={busy} disabled={appCode.length !== 6}>
+            <ActionButton
+              type="submit"
+              loading={busy}
+              disabled={appCode.length > 0 && appCode.length !== 6}
+            >
               Guardar acceso
             </ActionButton>
           </div>
