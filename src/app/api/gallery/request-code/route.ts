@@ -1,6 +1,12 @@
-import { NextRequest, NextResponse } from "next/server";
-import { adminEmail, createChallengeToken, generateCode, cookieOptions, CHALLENGE_COOKIE } from "@/lib/gallery/auth";
 import { sendGalleryCode } from "@/lib/email";
+import {
+  CHALLENGE_COOKIE,
+  adminEmail,
+  cookieOptions,
+  createChallengeToken,
+  generateCode,
+} from "@/lib/gallery/auth";
+import { type NextRequest, NextResponse } from "next/server";
 
 export const runtime = "nodejs";
 
@@ -36,11 +42,16 @@ export async function POST(request: NextRequest) {
   try {
     await sendGalleryCode(email, code);
   } catch (error) {
+    const reason = (error as { reason?: string }).reason ?? "unknown";
     console.error("[gallery] fallo al enviar el código", error);
-    return NextResponse.json({ message: "No se pudo enviar el correo" }, { status: 502 });
+    return NextResponse.json({ message: "No se pudo enviar el correo", reason }, { status: 502 });
   }
 
   const response = NextResponse.json({ ok: true });
-  response.cookies.set(CHALLENGE_COOKIE, createChallengeToken(email, code), cookieOptions.challenge);
+  response.cookies.set(
+    CHALLENGE_COOKIE,
+    createChallengeToken(email, code),
+    cookieOptions.challenge,
+  );
   return response;
 }

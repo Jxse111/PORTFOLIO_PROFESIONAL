@@ -17,8 +17,12 @@ export async function sendPostNotification(toEmails: string[], post: PostInfo) {
   }
 
   // Dynamic import to avoid build-time dependency if not installed
-  type NodemailerLike = { createTransport: (opts: unknown) => { sendMail: (msg: unknown) => Promise<unknown> } };
-  const nmModule = (await import("nodemailer")) as unknown as NodemailerLike & { default?: NodemailerLike };
+  type NodemailerLike = {
+    createTransport: (opts: unknown) => { sendMail: (msg: unknown) => Promise<unknown> };
+  };
+  const nmModule = (await import("nodemailer")) as unknown as NodemailerLike & {
+    default?: NodemailerLike;
+  };
   const nodemailer = (nmModule.default ?? nmModule) as NodemailerLike;
 
   const transporter = nodemailer.createTransport({
@@ -65,7 +69,10 @@ export async function sendGalleryCode(to: string, code: string) {
   const from = process.env.FROM_EMAIL || user;
 
   if (!host || !port || !user || !pass) {
-    throw new Error("Faltan las credenciales SMTP (SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASS).");
+    throw mailError(
+      "missing-config",
+      "Faltan las credenciales SMTP (SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASS).",
+    );
   }
 
   type NodemailerLike = {
@@ -93,15 +100,41 @@ export async function sendGalleryCode(to: string, code: string) {
     </div>
   `;
 
-  await transporter.sendMail({
-    from,
-    to,
-    subject: `Código para subir imágenes: ${code}`,
-    text: `Tu código para subir imágenes a la galería es ${code}. Caduca en 10 minutos.`,
-    html,
-  });
+  try {
+    await transporter.sendMail({
+      from,
+      to,
+      subject: `Código para subir imágenes: ${code}`,
+      text: `Tu código para subir imágenes a la galería es ${code}. Caduca en 10 minutos.`,
+      html,
+    });
+  } catch (error) {
+    throw mailError(mailReason(error), "No se pudo enviar el correo.");
+  }
 
   return { sent: true } as const;
+}
+
+function mailError(reason: string, message: string) {
+  const error = new Error(message) as Error & { reason: string };
+  error.reason = reason;
+  return error;
+}
+
+function mailReason(error: unknown): string {
+  switch ((error as { code?: string } | null)?.code) {
+    case "EAUTH":
+      return "auth";
+    case "ECONNECTION":
+    case "ESOCKET":
+      return "connection";
+    case "ETIMEDOUT":
+      return "timeout";
+    case "EDNS":
+      return "dns";
+    default:
+      return "unknown";
+  }
 }
 
 function escapeHtml(str: string) {
