@@ -24,6 +24,18 @@ function today(): string {
   return new Date().toISOString().slice(0, 10);
 }
 
+/** Traduce los errores del almacenamiento a algo que se entienda en la página. */
+function uploadErrorMessage(error: unknown): string {
+  const message = (error as Error | null)?.message ?? "";
+  if (/presigned|client token|authoriz/i.test(message)) {
+    return "No se pudo autorizar la subida. Vuelve a intentarlo en unos segundos.";
+  }
+  if (/size|large|body|exceed/i.test(message)) {
+    return "El audio no se pudo subir. Prueba con un archivo más pequeño.";
+  }
+  return message || "No se pudo subir el audio. Vuelve a intentarlo.";
+}
+
 function readDuration(file: File): Promise<number> {
   return new Promise((resolve) => {
     const audio = document.createElement("audio");
@@ -135,11 +147,20 @@ export default function PodcastUpload() {
       const extension = (file.name.split(".").pop() ?? "mp3")
         .toLowerCase()
         .replace(/[^a-z0-9]/g, "");
+      const contentType =
+        file.type ||
+        ({
+          mp3: "audio/mpeg",
+          wav: "audio/wav",
+          ogg: "audio/ogg",
+          webm: "audio/webm",
+        } as Record<string, string>)[extension] ||
+        "audio/mp4";
       const pathname = `${AUDIO_PREFIX}${slug(title) || "episodio"}-${Date.now()}.${extension || "mp3"}`;
 
       const blob = await uploadPresigned(pathname, file, {
         access: "public",
-        contentType: file.type || undefined,
+        contentType,
         handleUploadUrl: "/api/podcast/upload",
         onUploadProgress: ({ percentage }) => setProgress(Math.round(percentage)),
       });
@@ -154,7 +175,7 @@ export default function PodcastUpload() {
           description: description.trim(),
           audioUrl: blob.url,
           pathname: blob.pathname,
-          contentType: file.type || "audio/mpeg",
+          contentType,
           sizeBytes: file.size,
           durationSeconds: duration,
           publishedAt,
@@ -172,7 +193,7 @@ export default function PodcastUpload() {
       setMessage({ text: `“${newTitle}” ya está publicado.`, kind: "info" });
       router.refresh();
     } catch (error) {
-      setMessage({ text: (error as Error).message, kind: "error" });
+      setMessage({ text: uploadErrorMessage(error), kind: "error" });
     } finally {
       setBusy(false);
       setProgress(null);
