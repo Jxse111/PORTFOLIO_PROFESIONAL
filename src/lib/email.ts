@@ -92,8 +92,8 @@ export async function sendGalleryCode(to: string, code: string) {
 
   const html = `
     <div style="font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif; line-height: 1.5; color: #111827;">
-      <h1 style="margin: 0 0 12px; font-size: 20px;">Tu código para subir imágenes</h1>
-      <p style="margin: 0 0 16px; color: #374151;">Introduce este código en la galería para continuar:</p>
+      <h1 style="margin: 0 0 12px; font-size: 20px;">Tu código de verificación</h1>
+      <p style="margin: 0 0 16px; color: #374151;">Introduce este código en la web para continuar:</p>
       <p style="margin: 0 0 24px; font-size: 32px; font-weight: 700; letter-spacing: 6px; font-family: ui-monospace, SFMono-Regular, Menlo, monospace;">${escapeHtml(code)}</p>
       <p style="margin: 0 0 8px; color: #6B7280; font-size: 14px;">Caduca en 10 minutos y solo sirve una vez.</p>
       <p style="margin: 0; color: #6B7280; font-size: 14px;">Si no has sido tú, ignora este correo: sin el código nadie puede subir nada.</p>
@@ -104,8 +104,8 @@ export async function sendGalleryCode(to: string, code: string) {
     await transporter.sendMail({
       from,
       to,
-      subject: `Código para subir imágenes: ${code}`,
-      text: `Tu código para subir imágenes a la galería es ${code}. Caduca en 10 minutos.`,
+      subject: `Tu código de verificación: ${code}`,
+      text: `Tu código de verificación es ${code}. Caduca en 10 minutos.`,
       html,
     });
   } catch (error) {

@@ -2,7 +2,7 @@
 
 import { AUDIO_PREFIX, MAX_AUDIO_BYTES } from "@/lib/podcast/config";
 import { Column, Heading, Icon, Row, Text } from "@once-ui-system/core";
-import { upload } from "@vercel/blob/client";
+import { uploadPresigned } from "@vercel/blob/client";
 import { useRouter } from "next/navigation";
 import { useRef, useState } from "react";
 import ActionButton from "./ActionButton";
@@ -137,8 +137,9 @@ export default function PodcastUpload() {
         .replace(/[^a-z0-9]/g, "");
       const pathname = `${AUDIO_PREFIX}${slug(title) || "episodio"}-${Date.now()}.${extension || "mp3"}`;
 
-      const blob = await upload(pathname, file, {
+      const blob = await uploadPresigned(pathname, file, {
         access: "public",
+        contentType: file.type || undefined,
         handleUploadUrl: "/api/podcast/upload",
         onUploadProgress: ({ percentage }) => setProgress(Math.round(percentage)),
       });
