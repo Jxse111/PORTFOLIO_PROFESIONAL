@@ -1,5 +1,5 @@
-import fs from "fs";
-import path from "path";
+import fs from "node:fs";
+import path from "node:path";
 import matter from "gray-matter";
 
 type Team = {
@@ -62,7 +62,7 @@ function readMDXFile(filePath: string) {
     images: data.images || [],
     tag: data.tag || [],
     team: data.team || [],
-    link: data.link || "",
+    link: data.link || data.web || "",
     technologies: Array.isArray(data.technologies) ? data.technologies : [],
   };
 

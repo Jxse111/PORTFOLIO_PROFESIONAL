@@ -1,5 +1,5 @@
-import { NEWS_SOURCES, type NewsCategory } from "./sources";
 import { fetchFeed } from "./rss";
+import { NEWS_SOURCES, type NewsCategory } from "./sources";
 import type { NewsItem } from "./types";
 
 export { NEWS_SOURCES, NEWS_CATEGORIES, type NewsCategory } from "./sources";
@@ -13,7 +13,10 @@ function dedupe(items: NewsItem[]): NewsItem[] {
   const result: NewsItem[] = [];
 
   for (const item of items) {
-    const titleKey = item.title.toLowerCase().replace(/[^a-z0-9]+/gi, "").slice(0, 60);
+    const titleKey = item.title
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/gi, "")
+      .slice(0, 60);
     if (seenIds.has(item.id) || seenTitles.has(titleKey)) continue;
     seenIds.add(item.id);
     seenTitles.add(titleKey);
@@ -28,7 +31,9 @@ function dedupe(items: NewsItem[]): NewsItem[] {
  * antigua. Las fuentes que fallen se ignoran: la página nunca se cae por un
  * feed caído.
  */
-export async function getNews(options?: { category?: NewsCategory; limit?: number }): Promise<NewsItem[]> {
+export async function getNews(options?: { category?: NewsCategory; limit?: number }): Promise<
+  NewsItem[]
+> {
   const sources = options?.category
     ? NEWS_SOURCES.filter((source) => source.category === options.category)
     : NEWS_SOURCES;
@@ -45,29 +50,10 @@ export async function getNews(options?: { category?: NewsCategory; limit?: numbe
 }
 
 /**
- * Selección para la portada: intenta repartir entre categorías para que el
- * carrusel no se llene con una sola fuente.
+ * Selección para la portada: las noticias más recientes, sin reparto por fuente.
+ * El carrusel de inicio debe mostrar exactamente lo último publicado; mezclar
+ * fuentes hacía que titulares con horas de antigüedad aparecieran por delante.
  */
 export async function getFeaturedNews(limit = 8): Promise<NewsItem[]> {
-  const all = await getNews();
-  const featured: NewsItem[] = [];
-  const perSource = new Map<string, number>();
-
-  for (const item of all) {
-    const used = perSource.get(item.source.id) ?? 0;
-    if (used >= 2) continue;
-    perSource.set(item.source.id, used + 1);
-    featured.push(item);
-    if (featured.length >= limit) break;
-  }
-
-  // Si con el reparto no llegamos al mínimo, completamos con lo más reciente.
-  if (featured.length < limit) {
-    for (const item of all) {
-      if (featured.length >= limit) break;
-      if (!featured.some((existing) => existing.id === item.id)) featured.push(item);
-    }
-  }
-
-  return featured;
+  return getNews({ limit });
 }

@@ -1,20 +1,21 @@
+import { Mailchimp } from "@/components";
+import { TechStack } from "@/components/TechStack";
+import { LatestNews } from "@/components/news/LatestNews";
+import { LatestEpisodes } from "@/components/podcast/LatestEpisodes";
+import { LatestProjects } from "@/components/work/LatestProjects";
+import { about, baseURL, home, person, routes } from "@/resources";
 import {
-  Heading,
-  Text,
-  Button,
   Avatar,
-  RevealFx,
-  Column,
   Badge,
+  Button,
+  Column,
+  Heading,
+  Meta,
+  RevealFx,
   Row,
   Schema,
-  Meta,
+  Text,
 } from "@once-ui-system/core";
-import { home, about, person, work, baseURL, routes } from "@/resources";
-import { Mailchimp } from "@/components";
-import { Projects } from "@/components/work/Projects";
-import { LatestNews } from "@/components/news/LatestNews";
-import { TechStack } from "@/components/TechStack";
 
 export async function generateMetadata() {
   return Meta.generate({
@@ -109,13 +110,9 @@ export default async function Home() {
         </Column>
       </Column>
       <RevealFx translateY="8" delay={0.3}>
-        <Projects range={[1, 1]} />
+        <LatestProjects />
       </RevealFx>
-      <Row fillWidth horizontal="center">
-        <Button href={work.path} variant="tertiary" size="s" data-border="rounded" arrowIcon>
-          Ver todos los proyectos
-        </Button>
-      </Row>
+      {routes["/podcast"] && <LatestEpisodes />}
       {routes["/noticias"] && <LatestNews />}
       <Mailchimp />
     </Column>

@@ -53,50 +53,45 @@ export default function PodcastList({ episodes }: { episodes: PodcastEpisode[] }
   return (
     <Column fillWidth gap="16">
       {episodes.map((episode) => (
-        <Card
-          key={episode.id}
-          fillWidth
-          padding="24"
-          radius="l"
-          background="surface"
-          border="neutral-alpha-weak"
-        >
-          <Column gap="12" fillWidth>
-            <Row gap="8" vertical="center">
-              <Text variant="body-default-xs" onBackground="neutral-medium">
-                {formatDate(episode.publishedAt)}
-              </Text>
-              {episode.durationSeconds > 0 && (
-                <Text variant="body-default-xs" onBackground="neutral-weak">
-                  · {formatDuration(episode.durationSeconds)}
+        <div key={episode.id} id={episode.id} style={{ scrollMarginTop: 96 }}>
+          <Card fillWidth padding="24" radius="l" background="surface" border="neutral-alpha-weak">
+            <Column gap="12" fillWidth>
+              <Row gap="8" vertical="center">
+                <Text variant="body-default-xs" onBackground="neutral-medium">
+                  {formatDate(episode.publishedAt)}
+                </Text>
+                {episode.durationSeconds > 0 && (
+                  <Text variant="body-default-xs" onBackground="neutral-weak">
+                    · {formatDuration(episode.durationSeconds)}
+                  </Text>
+                )}
+              </Row>
+              <Heading as="h2" variant="heading-strong-m">
+                {episode.title}
+              </Heading>
+              {episode.description && (
+                <Text variant="body-default-s" onBackground="neutral-weak">
+                  {episode.description}
                 </Text>
               )}
-            </Row>
-            <Heading as="h2" variant="heading-strong-m">
-              {episode.title}
-            </Heading>
-            {episode.description && (
-              <Text variant="body-default-s" onBackground="neutral-weak">
-                {episode.description}
-              </Text>
-            )}
-            {/* biome-ignore lint/a11y/useMediaCaption: aún no hay transcripciones de los episodios */}
-            <audio
-              ref={(element) => {
-                if (element) players.current.set(episode.id, element);
-                else players.current.delete(episode.id);
-              }}
-              src={episode.audioUrl}
-              controls
-              preload="none"
-              onPlay={() => setPlaying(episode.id)}
-              onPause={() => setPlaying((current) => (current === episode.id ? null : current))}
-              style={{ width: "100%" }}
-            >
-              Tu navegador no admite la reproducción de audio.
-            </audio>
-          </Column>
-        </Card>
+              {/* biome-ignore lint/a11y/useMediaCaption: aún no hay transcripciones de los episodios */}
+              <audio
+                ref={(element) => {
+                  if (element) players.current.set(episode.id, element);
+                  else players.current.delete(episode.id);
+                }}
+                src={episode.audioUrl}
+                controls
+                preload="none"
+                onPlay={() => setPlaying(episode.id)}
+                onPause={() => setPlaying((current) => (current === episode.id ? null : current))}
+                style={{ width: "100%" }}
+              >
+                Tu navegador no admite la reproducción de audio.
+              </audio>
+            </Column>
+          </Card>
+        </div>
       ))}
     </Column>
   );

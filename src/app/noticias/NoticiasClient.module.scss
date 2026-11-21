@@ -106,6 +106,41 @@
   display: none;
 }
 
+.sortRow {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--static-space-8);
+  padding-top: var(--static-space-4);
+}
+
+.sortButton {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--static-space-4);
+  min-height: 36px;
+  padding: var(--static-space-4) var(--static-space-12);
+  border-radius: var(--radius-m);
+  border: 1px solid var(--neutral-alpha-medium);
+  background: transparent;
+  color: var(--neutral-on-background-weak);
+  font-family: var(--font-family-body);
+  font-size: var(--font-size-body-xs);
+  cursor: pointer;
+  transition: all 200ms var(--transition-eased);
+}
+
+.sortButton:hover {
+  border-color: var(--brand-alpha-medium);
+  color: var(--neutral-on-background-strong);
+}
+
+.sortButtonActive {
+  background: var(--brand-alpha-weak);
+  border-color: var(--brand-alpha-strong);
+  color: var(--brand-on-background-strong);
+}
+
 .grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
