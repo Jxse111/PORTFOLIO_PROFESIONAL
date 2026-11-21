@@ -4,6 +4,7 @@
   position: sticky !important;
   top: 0;
   z-index: 3;
+  padding: 8px 0 16px;
   background: var(--page-background);
   backdrop-filter: blur(12px);
 }
@@ -16,17 +17,31 @@
   }
 }
 
+/* Contenedor visible de los filtros: antes los botones parecían cuadrados
+   porque el fondo y los bordes de Once UI rompían el redondeo. */
+.filterPanel {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 14px;
+  border: 1px solid var(--neutral-alpha-weak);
+  border-radius: 28px;
+  background: var(--neutral-alpha-weak);
+}
+
 .searchInput {
   width: 100%;
   padding: var(--static-space-12) var(--static-space-16);
-  border-radius: var(--radius-m);
+  border-radius: 9999px !important;
   border: 1px solid var(--neutral-alpha-medium);
-  background: var(--neutral-alpha-weak);
+  background: var(--page-background);
   color: var(--neutral-on-background-strong);
   font-family: var(--font-family-body);
   font-size: var(--font-size-body-s);
   outline: none;
-  transition: border-color 200ms var(--transition-eased);
+  transition:
+    border-color 200ms var(--transition-eased),
+    box-shadow 200ms var(--transition-eased);
 }
 
 .searchInput::placeholder {
@@ -35,6 +50,7 @@
 
 .searchInput:focus {
   border-color: var(--brand-alpha-strong);
+  box-shadow: 0 0 0 3px var(--brand-alpha-weak);
 }
 
 @media (max-width: 768px) {
@@ -43,6 +59,49 @@
        descuadra la página. */
     font-size: 16px;
   }
+}
+
+.tabWrapper {
+  position: relative;
+  padding: 4px;
+  border: 1px solid var(--neutral-alpha-weak);
+  border-radius: 9999px;
+  background: var(--page-background);
+}
+
+/* Degradado en el borde derecho para que se vea que hay más categorías. */
+.tabWrapper::after {
+  content: "";
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  width: 40px;
+  height: calc(100% - 8px);
+  border-radius: 9999px;
+  pointer-events: none;
+  background: linear-gradient(to right, transparent, var(--page-background));
+  opacity: 1;
+  transition: opacity 200ms var(--transition-eased);
+}
+
+.tabWrapper.atEnd::after {
+  opacity: 0;
+}
+
+.tabScroller {
+  display: flex;
+  flex-wrap: nowrap;
+  gap: 4px;
+  min-inline-size: 0;
+  margin: 0;
+  padding: 0 2px;
+  overflow-x: auto;
+  border: 0;
+  scrollbar-width: none;
+}
+
+.tabScroller::-webkit-scrollbar {
+  display: none;
 }
 
 .tab {
@@ -57,8 +116,8 @@
      fondo cuadrado: se fuerza la forma de pastilla también en foco. */
   appearance: none !important;
   -webkit-appearance: none !important;
+  border: 0 !important;
   border-radius: 9999px !important;
-  border: 1px solid var(--neutral-alpha-medium);
   background: transparent;
   color: var(--neutral-on-background-weak);
   font-family: var(--font-family-body);
@@ -66,66 +125,46 @@
   line-height: 1.2;
   cursor: pointer;
   white-space: nowrap;
-  transition: all 200ms var(--transition-eased);
+  transition:
+    background-color 200ms var(--transition-eased),
+    color 200ms var(--transition-eased),
+    box-shadow 200ms var(--transition-eased);
 }
 
 .tab:hover {
-  border-color: var(--brand-alpha-medium);
+  background: var(--neutral-alpha-weak);
   color: var(--neutral-on-background-strong);
 }
 
-.tabActive {
+.tabActive,
+.tabActive:hover {
   background: var(--brand-alpha-weak);
-  border-color: var(--brand-alpha-strong);
   color: var(--brand-on-background-strong);
-  border-radius: 9999px !important;
+  box-shadow: inset 0 0 0 1px var(--brand-alpha-strong);
 }
 
 .tab:focus-visible {
-  border-radius: 9999px !important;
-}
-
-.tabWrapper {
-  position: relative;
-}
-
-/* Degradado en el borde derecho para que se vea que hay más categorías. */
-.tabWrapper::after {
-  content: "";
-  position: absolute;
-  top: 0;
-  right: 0;
-  width: 40px;
-  height: 100%;
-  pointer-events: none;
-  background: linear-gradient(to right, transparent, var(--page-background));
-  opacity: 1;
-  transition: opacity 200ms var(--transition-eased);
-}
-
-.tabWrapper.atEnd::after {
-  opacity: 0;
-}
-
-.tabScroller {
-  display: flex;
-  flex-wrap: nowrap;
-  gap: var(--static-space-8);
-  overflow-x: auto;
-  scrollbar-width: none;
-  padding-bottom: var(--static-space-4);
-}
-
-.tabScroller::-webkit-scrollbar {
-  display: none;
+  outline: 2px solid var(--brand-alpha-strong);
+  outline-offset: -2px;
 }
 
 .sortRow {
   display: flex;
   align-items: center;
   flex-wrap: wrap;
-  gap: var(--static-space-8);
-  padding-top: var(--static-space-4);
+  gap: 8px;
+  padding: 0 4px 2px;
+}
+
+.sortGroup {
+  display: inline-flex;
+  gap: 4px;
+  min-inline-size: 0;
+  margin: 0;
+  padding: 4px;
+  border: 1px solid var(--neutral-alpha-weak);
+  border-radius: 9999px;
+  background: var(--page-background);
 }
 
 .sortButton {
@@ -138,8 +177,8 @@
   padding: 6px 12px;
   appearance: none !important;
   -webkit-appearance: none !important;
+  border: 0 !important;
   border-radius: 9999px !important;
-  border: 1px solid var(--neutral-alpha-medium);
   background: transparent;
   color: var(--neutral-on-background-weak);
   font-family: var(--font-family-body);
@@ -147,23 +186,25 @@
   line-height: 1.2;
   white-space: nowrap;
   cursor: pointer;
-  transition: all 200ms var(--transition-eased);
+  transition:
+    background-color 200ms var(--transition-eased),
+    color 200ms var(--transition-eased);
 }
 
 .sortButton:hover {
-  border-color: var(--brand-alpha-medium);
+  background: var(--neutral-alpha-weak);
   color: var(--neutral-on-background-strong);
 }
 
-.sortButtonActive {
+.sortButtonActive,
+.sortButtonActive:hover {
   background: var(--brand-alpha-weak);
-  border-color: var(--brand-alpha-strong);
   color: var(--brand-on-background-strong);
-  border-radius: 9999px !important;
 }
 
 .sortButton:focus-visible {
-  border-radius: 9999px !important;
+  outline: 2px solid var(--brand-alpha-strong);
+  outline-offset: -2px;
 }
 
 .grid {
@@ -178,9 +219,25 @@
   }
 }
 
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+
 @media (max-width: 640px) {
   .grid {
     grid-template-columns: 1fr;
+  }
+  .filterPanel {
+    padding: 10px;
+    border-radius: 22px;
   }
 }
 

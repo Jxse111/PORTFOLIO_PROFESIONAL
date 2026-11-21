@@ -35,7 +35,7 @@ export default function NoticiasClient({ items }: NoticiasClientProps) {
   const [query, setQuery] = useState("");
   const [sort, setSort] = useState<Sort>("recent");
   const [visible, setVisible] = useState(PAGE_SIZE);
-  const tabsRef = useRef<HTMLDivElement>(null);
+  const tabsRef = useRef<HTMLFieldSetElement>(null);
   const [tabsAtEnd, setTabsAtEnd] = useState(false);
 
   // Oculta el degradado del borde cuando ya no queda nada por desplazar.
@@ -106,73 +106,79 @@ export default function NoticiasClient({ items }: NoticiasClientProps) {
         </Text>
       </Column>
 
-      <Column fillWidth gap="16" className={styles.filters} paddingY="12">
-        <input
-          className={styles.searchInput}
-          type="search"
-          value={query}
-          placeholder="Buscar por titular, tema o fuente…"
-          aria-label="Buscar noticias"
-          onChange={(event) => {
-            setQuery(event.target.value);
-            setVisible(PAGE_SIZE);
-          }}
-        />
+      <Column fillWidth className={styles.filters}>
+        <div className={styles.filterPanel}>
+          <input
+            className={styles.searchInput}
+            type="search"
+            value={query}
+            placeholder="Buscar por titular, tema o fuente…"
+            aria-label="Buscar noticias"
+            onChange={(event) => {
+              setQuery(event.target.value);
+              setVisible(PAGE_SIZE);
+            }}
+          />
 
-        <div className={`${styles.tabWrapper} ${tabsAtEnd ? styles.atEnd : ""}`}>
-          <div className={styles.tabScroller} ref={tabsRef} onScroll={updateTabsFade}>
-            <button
-              type="button"
-              className={`${styles.tab} ${filter === "todas" ? styles.tabActive : ""}`}
-              onClick={() => changeFilter("todas")}
-              aria-pressed={filter === "todas"}
-            >
-              <Icon name="fire" size="xs" />
-              Todas ({counts.get("todas") ?? 0})
-            </button>
-            {NEWS_CATEGORIES.map((category) => (
+          <div className={`${styles.tabWrapper} ${tabsAtEnd ? styles.atEnd : ""}`}>
+            <fieldset className={styles.tabScroller} ref={tabsRef} onScroll={updateTabsFade}>
+              <legend className={styles.srOnly}>Filtrar noticias por categoría</legend>
               <button
-                key={category.id}
                 type="button"
-                className={`${styles.tab} ${filter === category.id ? styles.tabActive : ""}`}
-                onClick={() => changeFilter(category.id)}
-                aria-pressed={filter === category.id}
+                className={`${styles.tab} ${filter === "todas" ? styles.tabActive : ""}`}
+                onClick={() => changeFilter("todas")}
+                aria-pressed={filter === "todas"}
               >
-                <Icon name={category.icon} size="xs" />
-                {category.label} ({counts.get(category.id) ?? 0})
+                <Icon name="fire" size="xs" />
+                Todas ({counts.get("todas") ?? 0})
               </button>
-            ))}
+              {NEWS_CATEGORIES.map((category) => (
+                <button
+                  key={category.id}
+                  type="button"
+                  className={`${styles.tab} ${filter === category.id ? styles.tabActive : ""}`}
+                  onClick={() => changeFilter(category.id)}
+                  aria-pressed={filter === category.id}
+                >
+                  <Icon name={category.icon} size="xs" />
+                  {category.label} ({counts.get(category.id) ?? 0})
+                </button>
+              ))}
+            </fieldset>
           </div>
-        </div>
 
-        <div className={styles.sortRow}>
-          <Text variant="body-default-xs" onBackground="neutral-weak">
-            Ordenar por
-          </Text>
-          <button
-            type="button"
-            className={`${styles.sortButton} ${sort === "recent" ? styles.sortButtonActive : ""}`}
-            onClick={() => {
-              setSort("recent");
-              setVisible(PAGE_SIZE);
-            }}
-            aria-pressed={sort === "recent"}
-          >
-            <Icon name="chevronDown" size="xs" />
-            Más recientes
-          </button>
-          <button
-            type="button"
-            className={`${styles.sortButton} ${sort === "oldest" ? styles.sortButtonActive : ""}`}
-            onClick={() => {
-              setSort("oldest");
-              setVisible(PAGE_SIZE);
-            }}
-            aria-pressed={sort === "oldest"}
-          >
-            <Icon name="chevronUp" size="xs" />
-            Más antiguos
-          </button>
+          <div className={styles.sortRow}>
+            <Text variant="body-default-xs" onBackground="neutral-weak">
+              Ordenar por
+            </Text>
+            <fieldset className={styles.sortGroup}>
+              <legend className={styles.srOnly}>Ordenar noticias</legend>
+              <button
+                type="button"
+                className={`${styles.sortButton} ${sort === "recent" ? styles.sortButtonActive : ""}`}
+                onClick={() => {
+                  setSort("recent");
+                  setVisible(PAGE_SIZE);
+                }}
+                aria-pressed={sort === "recent"}
+              >
+                <Icon name="chevronDown" size="xs" />
+                Más recientes
+              </button>
+              <button
+                type="button"
+                className={`${styles.sortButton} ${sort === "oldest" ? styles.sortButtonActive : ""}`}
+                onClick={() => {
+                  setSort("oldest");
+                  setVisible(PAGE_SIZE);
+                }}
+                aria-pressed={sort === "oldest"}
+              >
+                <Icon name="chevronUp" size="xs" />
+                Más antiguos
+              </button>
+            </fieldset>
+          </div>
         </div>
       </Column>
 
