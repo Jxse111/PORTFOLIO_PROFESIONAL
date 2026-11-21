@@ -2,6 +2,7 @@ import { Mailchimp } from "@/components";
 import { TechStack } from "@/components/TechStack";
 import { LatestNews } from "@/components/news/LatestNews";
 import { LatestEpisodes } from "@/components/podcast/LatestEpisodes";
+import GlassExplore from "@/components/react-bits/GlassExplore";
 import { LatestProjects } from "@/components/work/LatestProjects";
 import { about, baseURL, home, person, routes } from "@/resources";
 import {
@@ -115,6 +116,7 @@ export default async function Home() {
           </RevealFx>
         </Column>
       </Column>
+      <GlassExplore />
       <RevealFx translateY="8" delay={0.3}>
         <LatestProjects />
       </RevealFx>

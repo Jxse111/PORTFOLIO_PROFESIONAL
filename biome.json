@@ -22,5 +22,27 @@
     "formatter": {
       "quoteStyle": "double"
     }
-  }
+  },
+  "overrides": [
+    {
+      "include": ["src/components/react-bits/**"],
+      "linter": {
+        "rules": {
+          "a11y": {
+            "noAriaHiddenOnFocusable": "off",
+            "noSvgWithoutTitle": "off"
+          },
+          "complexity": {
+            "noForEach": "off"
+          },
+          "correctness": {
+            "useExhaustiveDependencies": "off"
+          },
+          "style": {
+            "useExponentiationOperator": "off"
+          }
+        }
+      }
+    }
+  ]
 }
