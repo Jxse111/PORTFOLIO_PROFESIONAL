@@ -53,7 +53,11 @@
   gap: var(--static-space-8);
   min-height: 36px;
   padding: 8px 14px;
-  border-radius: 9999px;
+  /* Los estilos globales de botón de Once UI llegan después y dejaban el
+     fondo cuadrado: se fuerza la forma de pastilla también en foco. */
+  appearance: none !important;
+  -webkit-appearance: none !important;
+  border-radius: 9999px !important;
   border: 1px solid var(--neutral-alpha-medium);
   background: transparent;
   color: var(--neutral-on-background-weak);
@@ -74,6 +78,11 @@
   background: var(--brand-alpha-weak);
   border-color: var(--brand-alpha-strong);
   color: var(--brand-on-background-strong);
+  border-radius: 9999px !important;
+}
+
+.tab:focus-visible {
+  border-radius: 9999px !important;
 }
 
 .tabWrapper {
@@ -127,7 +136,9 @@
   gap: var(--static-space-4);
   min-height: 34px;
   padding: 6px 12px;
-  border-radius: 9999px;
+  appearance: none !important;
+  -webkit-appearance: none !important;
+  border-radius: 9999px !important;
   border: 1px solid var(--neutral-alpha-medium);
   background: transparent;
   color: var(--neutral-on-background-weak);
@@ -148,6 +159,11 @@
   background: var(--brand-alpha-weak);
   border-color: var(--brand-alpha-strong);
   color: var(--brand-on-background-strong);
+  border-radius: 9999px !important;
+}
+
+.sortButton:focus-visible {
+  border-radius: 9999px !important;
 }
 
 .grid {
