@@ -17,6 +17,12 @@ import {
   Text,
 } from "@once-ui-system/core";
 
+/**
+ * La portada lee el índice de episodios en cada visita: así un audio recién
+ * publicado aparece en Apple Slices sin esperar a que expire la caché ISR.
+ */
+export const dynamic = "force-dynamic";
+
 export async function generateMetadata() {
   return Meta.generate({
     title: home.title,
