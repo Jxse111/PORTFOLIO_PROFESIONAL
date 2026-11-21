@@ -6,6 +6,20 @@ export { AUDIO_PREFIX, BLOB_PREFIX, INDEX_PATH };
 export type { PodcastEpisode };
 
 /**
+ * Para la portada: primero los episodios añadidos más recientemente y, dentro
+ * del mismo día de subida, ordenados por fecha de emisión (más reciente primero).
+ * Así los audios recién publicados no quedan enterrados por episodios antiguos.
+ */
+export function sortByRecentlyAdded(episodes: PodcastEpisode[]): PodcastEpisode[] {
+  return [...episodes].sort((a, b) => {
+    const dayA = (a.createdAt || a.publishedAt).slice(0, 10);
+    const dayB = (b.createdAt || b.publishedAt).slice(0, 10);
+    if (dayA !== dayB) return dayB.localeCompare(dayA);
+    return b.publishedAt.localeCompare(a.publishedAt);
+  });
+}
+
+/**
  * Vercel conecta los stores por OIDC (BLOB_STORE_ID) desde 2025 y solo añade
  * BLOB_READ_WRITE_TOKEN en algunos casos, así que vale cualquiera de los dos.
  */

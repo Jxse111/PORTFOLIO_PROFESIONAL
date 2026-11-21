@@ -29,12 +29,14 @@
 }
 
 .cover {
-  width: 88px;
-  height: 88px;
+  width: 104px;
+  height: 104px;
   flex-shrink: 0;
+  padding: var(--static-space-4);
+  border: 1px solid var(--neutral-alpha-weak);
   border-radius: var(--radius-m);
   background: var(--neutral-alpha-weak);
-  object-fit: cover;
+  object-fit: contain;
 }
 
 .content {
@@ -81,7 +83,7 @@
   }
 
   .cover {
-    width: 72px;
-    height: 72px;
+    width: 88px;
+    height: 88px;
   }
 }

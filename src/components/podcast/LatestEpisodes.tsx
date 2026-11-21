@@ -1,4 +1,4 @@
-import { readEpisodes } from "@/lib/podcast/episodes";
+import { readEpisodes, sortByRecentlyAdded } from "@/lib/podcast/episodes";
 import { podcast } from "@/resources";
 import { Button, Column, Heading, Line, Row, Text } from "@once-ui-system/core";
 import Image from "next/image";
@@ -32,7 +32,7 @@ export async function LatestEpisodes() {
   const episodes = await readEpisodes();
   if (episodes.length === 0) return null;
 
-  const latest = episodes.slice(0, 3);
+  const latest = sortByRecentlyAdded(episodes).slice(0, 3);
 
   return (
     <Column fillWidth gap="24" marginBottom="l">
